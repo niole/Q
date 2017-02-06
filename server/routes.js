@@ -25,8 +25,8 @@ let message = {
 let bathroom = {
   _id: "222344sfsdf",
   occupied: false,
-  latitude: 0,
-  longitude: 0
+  latitude: 51.5073,
+  longitude: -0.1222
 };
 
 //get user
@@ -88,6 +88,9 @@ router.get('/messages/:userid', function(req, res) {
   }
 });
 
+router.get('/bathrooms/near/:lat/:lng', function(req, res) {
+  res.send(bathroom);
+});
 
 
 // applies the routes to app

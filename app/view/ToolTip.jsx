@@ -6,7 +6,7 @@ import FlatButton from 'material-ui/FlatButton';
 import Line from './Line.jsx';
 
 
-const { arrayOf, string, node, number } = PropTypes;
+const { bool, arrayOf, string, node, number } = PropTypes;
 const propTypes = {
   location: arrayOf(string.isRequired).isRequired,
   lineLength: number.isRequired,
