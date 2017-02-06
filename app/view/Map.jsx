@@ -1,4 +1,5 @@
 import React, {PropTypes, Component} from 'react';
+import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
 
 
@@ -21,8 +22,9 @@ export default class Map extends Component {
    const {
       userLocation,
     } = this.props;
-    this.map = this.initMap(this.refs.map);
-    this.updateUserLocation(null, userLocation);
+    //this.map = this.initMap(this.refs.map);
+    //this.updateUserLocation(null, userLocation);
+    this.getNearbyBathrooms(userLocation);
   }
 
   updateUserLocation(oldLocation, newLocation) {
@@ -37,9 +39,17 @@ export default class Map extends Component {
     });
   }
 
-  getNearbyBathrooms() {
-    //TODO hit routes
-    //router.get('/bathrooms/near/:lat/:lng', function(req, res) {
+  getNearbyBathrooms(userLocation) {
+    const url = 'routes/bathrooms/near/:lat/:lng'.replace(":lat", userLocation[0]).replace(":lng", userLocation[1]);
+    $.ajax({
+      url,
+      success: d => {
+        console.log('success', d);
+      },
+      error: e => {
+        console.log('error', e);
+      }
+    });
   }
 
   initMap(ref) {

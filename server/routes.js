@@ -1,3 +1,4 @@
+"use strict";
 const express = require('express');
 const router = express.Router();
 
@@ -92,6 +93,4 @@ router.get('/bathrooms/near/:lat/:lng', function(req, res) {
   res.send(bathroom);
 });
 
-
-// applies the routes to app
-app.use('/', router);
+module.exports = router;
