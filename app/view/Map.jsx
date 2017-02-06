@@ -16,20 +16,24 @@ export default class Map extends Component {
   constructor() {
     super();
     this.map = null;
+    this.state = {
+      nearbyBathrooms: [], //[{lat: number, lng: number}]
+    };
   }
 
   componentDidMount() {
    const {
       userLocation,
     } = this.props;
-    //this.map = this.initMap(this.refs.map);
-    //this.updateUserLocation(null, userLocation);
+    this.map = this.initMap(this.refs.map);
+    this.updateUserLocation(null, userLocation);
     this.getNearbyBathrooms(userLocation);
   }
 
   updateUserLocation(oldLocation, newLocation) {
    if (oldLocation) {
     //TODO remove user from old location
+    //remove bathrooms that aren't nearby anymore
    }
 
    const marker = new google.maps.Marker({
@@ -43,8 +47,17 @@ export default class Map extends Component {
     const url = 'routes/bathrooms/near/:lat/:lng'.replace(":lat", userLocation[0]).replace(":lng", userLocation[1]);
     $.ajax({
       url,
-      success: d => {
-        console.log('success', d);
+      success: nearbyBathrooms => {
+        console.log('success');
+
+        nearbyBathrooms.forEach(b => {
+            new google.maps.Marker({
+              position: { lat: b.latitude, lng: b.longitude },
+               map: this.map
+             });
+         });
+
+         this.setState({ nearbyBathrooms });
       },
       error: e => {
         console.log('error', e);
@@ -59,7 +72,7 @@ export default class Map extends Component {
 
     const mapProp = {
         center: new google.maps.LatLng(...userLocation),
-        zoom: 5,
+        zoom: 14,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 

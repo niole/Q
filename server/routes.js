@@ -90,7 +90,7 @@ router.get('/messages/:userid', function(req, res) {
 });
 
 router.get('/bathrooms/near/:lat/:lng', function(req, res) {
-  res.send(bathroom);
+  res.send([bathroom]);
 });
 
 module.exports = router;
