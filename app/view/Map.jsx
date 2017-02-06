@@ -17,7 +17,7 @@ export default class Map extends Component {
     super();
     this.map = null;
     this.state = {
-      nearbyBathrooms: [], //[{lat: number, lng: number}]
+      nearbyBathrooms: [], //[{ marker: object, lat: number, lng: number}]
     };
   }
 
@@ -43,6 +43,10 @@ export default class Map extends Component {
     });
   }
 
+  handleBathroomClick(b) {
+    console.log('clicked on bathroom', b);
+  }
+
   getNearbyBathrooms(userLocation) {
     const url = 'routes/bathrooms/near/:lat/:lng'.replace(":lat", userLocation[0]).replace(":lng", userLocation[1]);
     $.ajax({
@@ -50,14 +54,27 @@ export default class Map extends Component {
       success: nearbyBathrooms => {
         console.log('success');
 
-        nearbyBathrooms.forEach(b => {
-            new google.maps.Marker({
-              position: { lat: b.latitude, lng: b.longitude },
-               map: this.map
-             });
-         });
+        const newNearByBathrooms = nearbyBathrooms.map(b => {
+          const marker = new google.maps.Marker({
+            position: { lat: b.latitude, lng: b.longitude },
+            map: this.map
+          });
 
-         this.setState({ nearbyBathrooms });
+          const boundListener = this.handleBathroomClick.bind(this, b);
+          google.maps.event.addListener(marker, 'click', boundListener);
+
+          return {
+            marker,
+            unmountHandlers: () => {
+              //TODO look into if this actuall works
+              google.maps.event.removeEventListener(marker, 'click', boundListener);
+            },
+            lat: b.latitude,
+            lng: b.longitude
+          };
+        });
+
+        this.setState({ nearbyBathrooms });
       },
       error: e => {
         console.log('error', e);
