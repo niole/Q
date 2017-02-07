@@ -40,8 +40,24 @@ export default class ToolTip extends MUIBaseTheme {
   enterLine() {
     const {
       userId,
+      bathroomId,
     } = this.props;
     console.log(userId, "enterLine");
+
+    const url = `routes/linemember/${userId}/${bathroomId}/new`;
+
+    $.ajax({
+      url,
+      success: () => {
+        console.log('success');
+
+        //update line vis locally
+      },
+      error: e => {
+        console.log('error', e);
+      }
+    });
+
   }
 
   leaveLine() {
