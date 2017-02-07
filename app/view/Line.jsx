@@ -18,7 +18,7 @@ export default class Line extends Component {
       userId,
     } = this.props;
 
-    if (!line.length) {
+    if (!lineLength) {
       return "there is no line";
     }
 
@@ -27,6 +27,7 @@ export default class Line extends Component {
     for (; i < lineLength; i++) {
       line[i] = (
         <LineMember
+          key={ `linemember-${i}` }
           userId={ userId }
           rankLineMember={ i }
           userRank={ userRank }

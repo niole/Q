@@ -1,4 +1,5 @@
 import React, {PropTypes, Component} from 'react';
+import ReactDOMServer from 'react-dom/server';
 import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
 
@@ -17,8 +18,9 @@ export default class Map extends Component {
     super();
     this.map = null;
     this.state = {
-      nearbyBathrooms: [], //[{ marker: object, lat: number, lng: number}]
+      nearbyBathrooms: [], //[{ marker: object, lat: number, lng: number, showTooltip: false, target: null}]
     };
+    this.closeTooltip = this.closeTooltip.bind(this);
   }
 
   componentDidMount() {
@@ -44,7 +46,18 @@ export default class Map extends Component {
   }
 
   handleBathroomClick(b) {
-    console.log('clicked on bathroom', b);
+    console.log('handleBathroomClick');
+    const nextBathrooms = this.state.nearbyBathrooms.map(otherB => {
+      if (otherB._id === b._id) {
+        otherB.showTooltip = !otherB.showTooltip;
+      } else {
+        otherB.showTooltip = false;
+      }
+
+      return otherB;
+    });
+
+    this.setState({ nearbyBathrooms: nextBathrooms });
   }
 
   getNearbyBathrooms(userLocation) {
@@ -60,21 +73,31 @@ export default class Map extends Component {
             map: this.map
           });
 
+          const infoWindow = new google.maps.InfoWindow({
+            content: ReactDOMServer.renderToString(<div id={ `${b._id}-tooltip` }/>)
+          });
+
           const boundListener = this.handleBathroomClick.bind(this, b);
-          google.maps.event.addListener(marker, 'click', boundListener);
+          google.maps.event.addListener(marker, 'click', () => {
+            infoWindow.open(this.map, marker);
+            boundListener(b);
+          });
 
           return {
             marker,
-            unmountHandlers: () => {
+            unmountHandler: () => {
               //TODO look into if this actuall works
               google.maps.event.removeEventListener(marker, 'click', boundListener);
             },
             lat: b.latitude,
-            lng: b.longitude
+            lng: b.longitude,
+            showTooltip: false,
+            lineLength: b.lineLength,
+            _id: b._id,
           };
         });
 
-        this.setState({ nearbyBathrooms });
+        this.setState({ nearbyBathrooms: newNearByBathrooms });
       },
       error: e => {
         console.log('error', e);
@@ -96,9 +119,57 @@ export default class Map extends Component {
     return new google.maps.Map(ref, mapProp);
   }
 
+  showOpenToolTips(bathrooms) {
+    const {
+      userId,
+    } = this.props;
+
+    let b;
+    let i=0;
+    for (; i < bathrooms.length; i++) {
+      b = bathrooms[i];
+      if (b.showTooltip) {
+          return (
+            <ToolTip
+              bathroomId={ b._id }
+              location={ [b.lat, b.lng] }
+              lineLength={ b.lineLength }
+              userRank={ -1 } //TODO send request to get this info
+              target={ document.getElementById(`${b._id}-tooltip`) }
+              shouldOpen={ true }
+              userId={ userId }
+              closeTooltip={ this.closeTooltip }
+            />
+          );
+      }
+    }
+  }
+
+  closeTooltip(bathroomId) {
+    const {
+      nearbyBathrooms,
+    } = this.state;
+
+    const newBathrooms = nearbyBathrooms.map(b => {
+      if (b._id === bathroomId) {
+        b.showTooltip = false;
+      }
+      return b;
+    });
+
+    this.setState({ nearbyBathrooms: newBathrooms });
+  }
+
 	render() {
+    const {
+      nearbyBathrooms,
+    } = this.state
+
 		return (
+      <div>
         <div id="map" ref="map"/>
+        { this.showOpenToolTips(nearbyBathrooms) }
+      </div>
 		);
 	}
 }

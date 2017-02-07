@@ -4,20 +4,29 @@ import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
 import Line from './Line.jsx';
+import MUIBaseTheme from './MUIBaseTheme.jsx';
 
 
-const { bool, arrayOf, string, node, number } = PropTypes;
+const { bool, arrayOf, string, object, number } = PropTypes;
 const propTypes = {
-  location: arrayOf(string.isRequired).isRequired,
+  location: arrayOf(number.isRequired).isRequired,
   lineLength: number.isRequired,
   userRank: number.isRequired, // rank > 0, in line, rank === 0, in bathroom, rank === -1, not in line
-  target: node.isRequired,
   shouldOpen: bool.isRequired,
   userId: string.isRequired,
+  bathroomId: string.isRequired,
+  target: object,
 };
 
 
-export default class ToolTip extends Component {
+export default class ToolTip extends MUIBaseTheme {
+  constructor() {
+    super();
+    this.enterLine = this.enterLine.bind(this);
+    this.leaveLine = this.leaveLine.bind(this);
+    this.handleRequestClose = this.handleRequestClose.bind(this);
+  }
+
   getButtons() {
     const {
       userRank,
@@ -53,13 +62,13 @@ export default class ToolTip extends Component {
     }
 
     return (
-      <FlatButton onClick={ handler } label={ label }/>
+      <FlatButton key={ `${label}-btn` } onClick={ handler } label={ label }/>
     );
   }
 
   getAddTimeButton(disabled) {
     return (
-      <FlatButton label="Add Time" onClick={ this.addTime } disabled={ disabled }/>
+      <FlatButton key="add-time" label="Add Time" onClick={ this.addTime } disabled={ disabled }/>
     );
   }
 
@@ -88,6 +97,14 @@ export default class ToolTip extends Component {
     );
   }
 
+  handleRequestClose() {
+    const {
+      closeTooltip,
+      bathroomId,
+    } = this.props;
+    closeTooltip(bathroomId);
+  }
+
 	render() {
     const {
       target,
@@ -95,18 +112,19 @@ export default class ToolTip extends Component {
       location,
     } = this.props;
 
+
     return (
       <Popover
         open={shouldOpen}
         anchorEl={target}
-        anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-        targetOrigin={{horizontal: 'right', vertical: 'top'}}
+        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        targetOrigin={{horizontal: 'left', vertical: 'bottom'}}
         onRequestClose={this.handleRequestClose}
       >
         <Menu>
-          <MenuItem>{ location }</MenuItem>
-          <MenuItem>{ this.getLineVis() }</MenuItem>
-          <MenuItem>{ this.getButtons() }</MenuItem>
+          <MenuItem key="location">{ location }</MenuItem>
+          <MenuItem key="line-vis">{ this.getLineVis() }</MenuItem>
+          <MenuItem key="btns">{ this.getButtons() }</MenuItem>
         </Menu>
       </Popover>
     );

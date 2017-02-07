@@ -27,7 +27,8 @@ let bathroom = {
   _id: "222344sfsdf",
   occupied: false,
   latitude: 51.5073,
-  longitude: -0.1222
+  longitude: -0.1222,
+  lineLength: 0,
 };
 
 //get user
