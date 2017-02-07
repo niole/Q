@@ -5,3 +5,15 @@ body {
 #map {
   height: 85vh;
 }
+
+.line {
+  width: 210px;
+  height: 30px;
+  display: inline-block;
+}
+
+.line-member {
+  height: 100%;
+  border: 1px solid;
+  display: inline-block;
+}

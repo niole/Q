@@ -46,7 +46,6 @@ export default class Map extends Component {
   }
 
   handleBathroomClick(b) {
-    console.log('handleBathroomClick');
     const nextBathrooms = this.state.nearbyBathrooms.map(otherB => {
       if (otherB._id === b._id) {
         otherB.showTooltip = !otherB.showTooltip;

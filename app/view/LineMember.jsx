@@ -26,6 +26,7 @@ export default class LineMember extends Component {
       userRank,
       rankLineMember,
       userId,
+      width,
     } = this.props;
     const color = userRank === rankLineMember ? "red" : "green";
 
@@ -33,7 +34,7 @@ export default class LineMember extends Component {
 		return (
       <div
         className="line-member"
-        style={{ background: color }}
+        style={{ width, background: color }}
         onClick={ this.sendCutRequest }
       />
 		);

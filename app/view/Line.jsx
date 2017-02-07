@@ -22,6 +22,8 @@ export default class Line extends Component {
       return "there is no line";
     }
 
+    const width = (100/lineLength)+"%";
+
     const line = new Array(lineLength);
     let i=0;
     for (; i < lineLength; i++) {
@@ -31,6 +33,7 @@ export default class Line extends Component {
           userId={ userId }
           rankLineMember={ i }
           userRank={ userRank }
+          width={ width }
         />
       );
     }
@@ -41,7 +44,7 @@ export default class Line extends Component {
 	render() {
 		return (
       <div>
-        line: { this.getLineMembers() }
+        line: <div className="line">{ this.getLineMembers() }</div>
       </div>
     );
 	}
