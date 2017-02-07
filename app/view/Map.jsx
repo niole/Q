@@ -2,6 +2,7 @@ import React, {PropTypes, Component} from 'react';
 import ReactDOMServer from 'react-dom/server';
 import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
+import MessagesBar from './MessagesBar.jsx';
 
 
 const { bool, arrayOf, string, node, number } = PropTypes;
@@ -171,6 +172,8 @@ export default class Map extends Component {
       <div>
         <div id="map" ref="map"/>
         { this.showOpenToolTips(nearbyBathrooms) }
+        <MessagesBar
+        />
       </div>
 		);
 	}
