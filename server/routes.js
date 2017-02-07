@@ -83,6 +83,19 @@ router.post('/linemember/:linememberid/leave', function(req, res) {
   res.send("done");
 });
 
+//send cut request
+router.post('/linemember/cut', function(req, res) {
+  console.log(req.body);
+
+  message.fromId = req.body.userId;
+  message.toId = req.body.userId; //TODO in future, figure out who's at that rank in that bathroom line
+
+  message = Object.assign(message, req.body);
+
+  res.send(message);
+});
+
+
 //get user's messages
 router.get('/messages/:userid', function(req, res) {
   if (message.toId === req.userid) {

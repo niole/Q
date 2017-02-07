@@ -7,6 +7,7 @@ const propTypes = {
   lineLength: number.isRequired,
   userRank: number.isRequired, // rank > 0, in line, rank === 0, in bathroom, rank === -1, not in line
   userId: string.isRequired,
+  bathroomId: string.isRequired,
 };
 
 
@@ -16,6 +17,7 @@ export default class Line extends Component {
       lineLength,
       userRank,
       userId,
+      bathroomId,
     } = this.props;
 
     if (!lineLength) {
@@ -34,6 +36,7 @@ export default class Line extends Component {
           rankLineMember={ i }
           userRank={ userRank }
           width={ width }
+          bathroomId={ bathroomId }
         />
       );
     }

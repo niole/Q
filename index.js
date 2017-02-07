@@ -2,12 +2,16 @@ const path = require('path');
 const express = require('express');
 const webpack = require('webpack');
 const webpackMiddleware = require('webpack-middleware');
+const bodyParser = require('body-parser');
 const config = require('./webpackconfig.js');
 const routes = require('./server/routes.js');
 
 const app = express();
 const compiler = webpack(config);
 
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(express.static('dist'));
 app.use("/routes", routes);
 app.use(webpackMiddleware(compiler));

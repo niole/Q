@@ -87,9 +87,11 @@ export default class ToolTip extends MUIBaseTheme {
       userRank,
       lineLength,
       userId,
+      bathroomId,
     } = this.props;
     return (
       <Line
+        bathroomId={ bathroomId }
         lineLength={ lineLength }
         userRank={ userRank }
         userId={ userId }

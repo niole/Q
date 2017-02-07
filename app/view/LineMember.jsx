@@ -1,24 +1,47 @@
 import React, {PropTypes, Component} from 'react';
+import $ from 'jquery';
 
 
-const { string, number } = PropTypes;
+const { string, func, number } = PropTypes;
 const propTypes = {
   userRank: number.isRequired,
   rankLineMember: number.isRequired,
   userId: string.isRequired,
+  bathroomId: string.isRequired,
 };
 
 export default class LineMember extends Component {
+  constructor() {
+    super();
+    this.sendCutRequest = this.sendCutRequest.bind(this);
+  }
+
   sendCutRequest() {
     const {
+      bathroomId,
       userRank,
       rankLineMember,
       userId,
     } = this.props;
 
-    if (userRank !== rankLineMember) {
-      console.log('sending cut request', this.props);
-    }
+    const url = 'routes/linemember/cut';
+
+    $.ajax({
+      url,
+      type: "POST",
+      data: {
+        "fromId": userId,
+        "bathroomId": bathroomId,
+        "rankLineMember": rankLineMember,
+        "money": 1,
+      },
+      dataType: "json",
+      success: () => {
+        console.log('success', arguments);
+      },
+      error: e => console.log(e)
+    });
+
   }
 
 	render() {

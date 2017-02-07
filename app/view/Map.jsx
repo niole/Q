@@ -77,6 +77,7 @@ export default class Map extends Component {
           });
 
           const boundListener = this.handleBathroomClick.bind(this, b);
+
           google.maps.event.addListener(marker, 'click', () => {
             infoWindow.open(this.map, marker);
             boundListener(b);
@@ -84,6 +85,7 @@ export default class Map extends Component {
 
           return {
             marker,
+            infoWindow,
             unmountHandler: () => {
               //TODO look into if this actuall works
               google.maps.event.removeEventListener(marker, 'click', boundListener);
@@ -152,6 +154,7 @@ export default class Map extends Component {
     const newBathrooms = nearbyBathrooms.map(b => {
       if (b._id === bathroomId) {
         b.showTooltip = false;
+        b.infoWindow.close();
       }
       return b;
     });
