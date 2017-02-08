@@ -1,6 +1,14 @@
 "use strict";
 const express = require('express');
 const router = express.Router();
+const models = require('./Models.js');
+
+const Bathroom = models.Bathroom;
+const User = models.User;
+const LineMember = models.LineMember;
+const Message = models.Message;
+const sequelize = models.sequelize;
+
 
 let user = {
   money: 10,
@@ -16,8 +24,7 @@ let lineMember = {
 
 let message = {
     _id: "344sfsdf",
-    latitude: 0,
-    longitude: 0,
+    bathroomId: "",
     fromId: "",
     toId: "",
     money: 0

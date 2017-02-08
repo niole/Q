@@ -1,19 +1,24 @@
-const sequelize = new Sequelize('postgres://user:pass@example.com:5432/dbname'); //TODO set up actual database
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize('mysql', 'root', 'root', {
+  host: "127.0.0.1",
+  port: 3306
+});
 
 
 const LineMember = sequelize.define(
   'linemember',
   {
     bathroomId: {
-      type: sequelize.STRING,
+      type: Sequelize.STRING,
       field: 'bathroom_id'
     },
     rank: {
-      type: sequelize.INTEGER, //0 means in bathroom
+      type: Sequelize.INTEGER, //0 means in bathroom
       field: 'rank'
     },
     userId: {
-      type: sequelize.STRING,
+      type: Sequelize.STRING,
       field: 'user_id'
     }
   },
@@ -27,20 +32,16 @@ LineMember.sync({force: true});
 const Message = sequelize.define(
   'message',
   {
-    latitude: {
-      type: Sequelize.INTEGER, //location of bathroom
-      field: 'lat'
-    },
-    longitude: {
-      type: sequelize.INTEGER,
-      field: 'long'
+    bathroomId: {
+      type: Sequelize.STRING,
+      field: 'bathroom_id'
     },
     fromId: {
-      type: sequelize.STRING, //id of user requesting to cut in line
+      type: Sequelize.STRING, //id of user requesting to cut in line
       field: 'from_id'
     },
     toId: {
-      type: sequelize.STRING, //id of user being requested
+      type: Sequelize.STRING, //id of user being requested
       field: 'to_id'
     },
     money: {
@@ -58,6 +59,10 @@ Message.sync({force: true});
 const User = sequelize.define(
   'user',
   {
+    username: {
+      type: Sequelize.STRING,
+      field: 'username'
+    },
     money: {
       type: Sequelize.FLOAT,
       field: 'money'
@@ -69,8 +74,8 @@ const User = sequelize.define(
 );
 
 User.sync({force: true}).then(function () {
-  // Table created
   return User.create({
+    username: "niole",
     money: 100.0
   });
 });
@@ -88,7 +93,11 @@ const Bathroom = sequelize.define(
     },
     longitude: {
       type: Sequelize.INTEGER,
-      field: 'long'
+      field: 'lng'
+    },
+    lineLength: {
+      type: Sequelize.INTEGER,
+      field: 'line_length'
     }
   },
   {
@@ -96,12 +105,12 @@ const Bathroom = sequelize.define(
   }
 );
 
-Bathroom.sync({force: true}).then(function () {
-  // Table created
-  return Bathroom.create({
-    occupied: false,
-    latitude: 8696,
-    longitude: 2344
-  });
-});
+Bathroom.sync({force: true});
 
+module.exports = {
+  Bathroom: Bathroom,
+  User: User,
+  LineMember: LineMember,
+  Message: Message,
+  sequelize: sequelize,
+};
