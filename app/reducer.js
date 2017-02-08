@@ -12,6 +12,7 @@ import {
   SET_BATHROOM_UNOCCUPIED,
   SHOW_BATHROOM_TOOLTIP,
   HIDE_BATHROOM_TOOLTIP,
+  ADD_TIME_IN_BATHROOM,
 } from './actions.js';
 
 
@@ -103,11 +104,23 @@ export default function appReducer(state = initialState, action) {
 
       return Object.assign({}, state, {
         lines: newLines,
+        nearbyBathrooms: state.nearbyBathrooms.map(b => {
+          if (action.data === b._id) {
+            b.lineLength -= 1;
+          }
+          return b;
+        })
       });
 
     case ADD_TO_LINE:
       return Object.assign({}, state, {
         lines: Object.assign(state.lines, action.data),
+        nearbyBathrooms: state.nearbyBathrooms.map(b => {
+          if (typeof action.data[b._id] === "number") {
+            b.lineLength += 1;
+          }
+          return b;
+        })
       });
 
     case ADD_MSG:

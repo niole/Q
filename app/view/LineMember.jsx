@@ -30,14 +30,14 @@ export default class LineMember extends Component {
       url,
       type: "POST",
       data: {
-        "fromId": userId,
-        "bathroomId": bathroomId,
-        "rankLineMember": rankLineMember,
-        "money": 1,
+        fromId: userId,
+        bathroomId: bathroomId,
+        rankLineMember: rankLineMember,
+        money: 1,
       },
       dataType: "json",
       success: () => {
-        console.log('success', arguments);
+        console.log('success');
       },
       error: e => console.log(e)
     });

@@ -10,7 +10,6 @@ const propTypes = {
   bathroomId: string.isRequired,
 };
 
-
 export default class Line extends Component {
   getLineMembers() {
     const {
@@ -33,7 +32,7 @@ export default class Line extends Component {
         <LineMember
           key={ `linemember-${i}` }
           userId={ userId }
-          rankLineMember={ i }
+          rankLineMember={ i+1 }
           userRank={ userRank }
           width={ width }
           bathroomId={ bathroomId }

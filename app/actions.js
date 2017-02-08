@@ -11,10 +11,18 @@ export const ADD_BATHROOMS = "addBathrooms";
 export const REMOVE_BATHROOMS = "removeBathrooms";
 export const SHOW_BATHROOM_TOOLTIP = "showBathroomTooltip";
 export const HIDE_BATHROOM_TOOLTIP = "hideBathroomTooltip";
+export const ADD_TIME_IN_BATHROOM = "addTimeInBathroom";
 
 export const UPDATE_USER_LOCATION = "updateUserLocation";
 export const UPDATE_USER_ID = "updateUserId";
 
+
+export function addTimeInBathroom(bathroomId) {
+  return {
+    type: ADD_TIME_IN_BATHROOM,
+    data: bathroomId,
+  };
+}
 
 export function hideBathroomTooltip(bathroomId) {
   return {
@@ -79,10 +87,10 @@ export function updateLineRank(newRank, bathroomId) {
   };
 }
 
-export function enterLine(bathroomId) {
+export function enterLine(lineMemberData) {
   return {
     type: ADD_TO_LINE,
-    data: bathroomId,
+    data: lineMemberData,
   };
 }
 

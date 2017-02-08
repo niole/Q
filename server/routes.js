@@ -28,7 +28,7 @@ let bathroom = {
   occupied: false,
   latitude: 51.5073,
   longitude: -0.1222,
-  lineLength: 5,
+  lineLength: 1,
 };
 
 //get user
@@ -38,13 +38,13 @@ router.get('/user/:id', function(req, res) {
 
 //update user's money
 router.post('/user/:id/:money', function(req, res) {
-    user.money += req.money;
+    user.money += req.params.money;
     res.send(user);
 });
 
 //get user's line locations
 router.get('/linemember/:userid', function(req, res) {
-  if (lineMember.userId === req.userid) {
+  if (lineMember.userId === req.params.userid) {
     res.send(lineMember);
   }
 });
@@ -52,16 +52,19 @@ router.get('/linemember/:userid', function(req, res) {
 //enter line at bathroom
 router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
   //req's data contains lat long
-  lineMember.userId = req.userid;
-  lineMember.bathroomId = req.bathroomId;
+  lineMember.userId = req.params.userid;
+  lineMember.bathroomId = req.params.bathroomid;
 
   //update length of bathroom line
   bathroom.lineLength += 1;
 
   //update user rank
-  lineMember.rank = bathroom.lineLength-1;
+  lineMember.rank = bathroom.lineLength;
 
-  res.send(lineMember);
+  res.send({
+    bathroomId: req.params.bathroomid,
+    rank: lineMember.rank,
+  });
 });
 
 //enter bathroom
@@ -78,13 +81,14 @@ router.get('/linemember/:linememberid/enter', function(req, res) {
   res.send(lineMember);
 });
 
-//leave bathroom
-router.get('/linemember/:linememberid/leave', function(req, res) {
+//leave bathroom/line
+router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
   //TODO should actually delete record
   //but instead will set lineMember rank to -1
+
   lineMember.rank = -1;
 
-  res.send("done");
+  res.send(req.params.bathroomId);
 });
 
 //send cut request
@@ -102,7 +106,7 @@ router.post('/linemember/cut', function(req, res) {
 
 //get user's messages
 router.get('/messages/:userid', function(req, res) {
-  if (message.toId === req.userid) {
+  if (message.toId === req.params.userid) {
     res.send([message]);
   }
 });

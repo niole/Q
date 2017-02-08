@@ -29,14 +29,12 @@ const defaultProps = {
 class Map extends Component {
   constructor() {
     super();
-    const self = this;
-    this.map = null;
 
-    navigator.geolocation.getCurrentPosition(function(locationData) {
+    navigator.geolocation.getCurrentPosition(locationData =>{
       if (locationData && locationData.coords) {
         const {
           updateUserLocation,
-        } = self.props;
+        } = this.props;
         const {
           longitude,
           latitude,
@@ -45,6 +43,7 @@ class Map extends Component {
       }
     });
 
+    this.map = null;
     this.closeTooltip = this.closeTooltip.bind(this);
   }
 
@@ -156,8 +155,6 @@ class Map extends Component {
             <ToolTip
               bathroomId={ b._id }
               location={ [b.lat, b.lng] }
-              lineLength={ b.lineLength }
-              userRank={ -1 } //TODO send request to get this info
               target={ document.getElementById(`${b._id}-tooltip`) }
               shouldOpen={ true }
               userId={ userId }
@@ -215,21 +212,6 @@ const mapStateToProps = (state) => {
       nearbyBathrooms,
   };
 }
-
-//const mapDispatchToProps = (dispatch, ownProps) => {
-//  //initiated by actions
-//  //put in a container component that
-//  return {
-//    updateUserLocation,
-//    addBathrooms,
-//    removeBathrooms,
-//    updateUserId,
-//    setBathroomToUnoccupied,
-//    setBathroomToOccupied,
-//    hideBathroomTooltip,
-//    showBathroomTooltip,
-//  };
-//}
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   //initiated by actions

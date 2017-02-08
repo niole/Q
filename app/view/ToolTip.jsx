@@ -1,25 +1,35 @@
 import React, {PropTypes, Component} from 'react';
+import $ from 'jquery';
+import { connect } from 'react-redux';
 import Popover from 'material-ui/Popover/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import MUIBaseTheme from './MUIBaseTheme.jsx';
 import FlatButton from 'material-ui/FlatButton';
 import Line from './Line.jsx';
-import MUIBaseTheme from './MUIBaseTheme.jsx';
+import {
+  enterLine,
+  leaveLine,
+} from '../actions.js';
+
 
 
 const { bool, arrayOf, string, object, number } = PropTypes;
 const propTypes = {
   location: arrayOf(number.isRequired).isRequired,
   lineLength: number.isRequired,
-  userRank: number.isRequired, // rank > 0, in line, rank === 0, in bathroom, rank === -1, not in line
   shouldOpen: bool.isRequired,
   userId: string.isRequired,
   bathroomId: string.isRequired,
   target: object,
+  userRank: number,
+};
+const defaultProps = {
+  userRank: -1,
 };
 
 
-export default class ToolTip extends MUIBaseTheme {
+class ToolTip extends MUIBaseTheme {
   constructor() {
     super();
     this.enterLine = this.enterLine.bind(this);
@@ -41,30 +51,45 @@ export default class ToolTip extends MUIBaseTheme {
     const {
       userId,
       bathroomId,
+      enterLine,
     } = this.props;
-    console.log(userId, "enterLine");
-
     const url = `routes/linemember/${userId}/${bathroomId}/new`;
 
     $.ajax({
       url,
-      success: () => {
+      success: lineDetails => {
         console.log('success');
-
-        //update line vis locally
+        const {
+          bathroomId,
+          rank,
+        } = lineDetails;
+        enterLine({ [bathroomId]: rank });
       },
       error: e => {
         console.log('error', e);
       }
     });
-
   }
 
   leaveLine() {
     const {
       userId,
+      bathroomId,
+      leaveLine,
     } = this.props;
-    console.log(userId, "leaveLine");
+
+    const url = `routes/linemember/${userId}/${bathroomId}/leave`;
+
+    $.ajax({
+      url,
+      success: bathroomId => {
+        console.log('success');
+        leaveLine(bathroomId);
+      },
+      error: e => {
+        console.log('error', e);
+      }
+    });
   }
 
   getEnterLeaveButton(userRank) {
@@ -100,11 +125,12 @@ export default class ToolTip extends MUIBaseTheme {
 
   getLineVis() {
     const {
-      userRank,
       lineLength,
       userId,
       bathroomId,
+      userRank,
     } = this.props;
+
     return (
       <Line
         bathroomId={ bathroomId }
@@ -150,3 +176,24 @@ export default class ToolTip extends MUIBaseTheme {
 }
 
 ToolTip.propTypes = propTypes;
+ToolTip.defaultProps = defaultProps;
+
+const mapStateToProps = (state, ownProps) => {
+  const bathroom = state.nearbyBathrooms.find(b => b._id === ownProps.bathroomId);
+  return {
+    userRank: state.lines[ownProps.bathroomId],
+    lineLength: bathroom ? bathroom.lineLength : 0,
+  };
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    enterLine: bId => dispatch(enterLine(bId)),
+    leaveLine: bId => dispatch(leaveLine(bId)),
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ToolTip)
