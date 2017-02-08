@@ -1,26 +1,50 @@
 import React, {PropTypes, Component} from 'react';
 import ReactDOMServer from 'react-dom/server';
+import { connect } from 'react-redux';
 import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
 import MessagesBar from './MessagesBar.jsx';
+import {
+  updateUserLocation,
+  addBathrooms,
+  removeBathrooms,
+  updateUserId,
+  setBathroomToUnoccupied,
+  setBathroomToOccupied,
+  hideBathroomTooltip,
+  showBathroomTooltip,
+} from '../actions.js';
 
 
-const { bool, arrayOf, string, node, number } = PropTypes;
+const { bool, arrayOf, string, object, node, number } = PropTypes;
 const propTypes = {
   userLocation: arrayOf(number),
   userId: string.isRequired,
+  nearbyBathrooms: arrayOf(object),
 };
 const defaultProps = {
   userLocation: [51.508742,-0.120850],
 };
 
-export default class Map extends Component {
+class Map extends Component {
   constructor() {
     super();
+    const self = this;
     this.map = null;
-    this.state = {
-      nearbyBathrooms: [], //[{ marker: object, lat: number, lng: number, showTooltip: false, target: null}]
-    };
+
+    navigator.geolocation.getCurrentPosition(function(locationData) {
+      if (locationData && locationData.coords) {
+        const {
+          updateUserLocation,
+        } = self.props;
+        const {
+          longitude,
+          latitude,
+        } = locationData.coords;
+        updateUserLocation([longitude, latitude]);
+      }
+    });
+
     this.closeTooltip = this.closeTooltip.bind(this);
   }
 
@@ -47,21 +71,18 @@ export default class Map extends Component {
   }
 
   handleBathroomClick(b) {
-    const nextBathrooms = this.state.nearbyBathrooms.map(otherB => {
-      if (otherB._id === b._id) {
-        otherB.showTooltip = !otherB.showTooltip;
-      } else {
-        otherB.showTooltip = false;
-      }
-
-      return otherB;
-    });
-
-    this.setState({ nearbyBathrooms: nextBathrooms });
+    const {
+      showBathroomTooltip,
+    } = this.props;
+    showBathroomTooltip(b._id);
   }
 
   getNearbyBathrooms(userLocation) {
+    const {
+      addBathrooms
+    } = this.props;
     const url = 'routes/bathrooms/near/:lat/:lng'.replace(":lat", userLocation[0]).replace(":lng", userLocation[1]);
+
     $.ajax({
       url,
       success: nearbyBathrooms => {
@@ -99,7 +120,7 @@ export default class Map extends Component {
           };
         });
 
-        this.setState({ nearbyBathrooms: newNearByBathrooms });
+        addBathrooms(newNearByBathrooms);
       },
       error: e => {
         console.log('error', e);
@@ -149,24 +170,15 @@ export default class Map extends Component {
 
   closeTooltip(bathroomId) {
     const {
-      nearbyBathrooms,
-    } = this.state;
-
-    const newBathrooms = nearbyBathrooms.map(b => {
-      if (b._id === bathroomId) {
-        b.showTooltip = false;
-        b.infoWindow.close();
-      }
-      return b;
-    });
-
-    this.setState({ nearbyBathrooms: newBathrooms });
+      hideBathroomTooltip,
+    } = this.props;
+    hideBathroomTooltip(bathroomId);
   }
 
 	render() {
     const {
       nearbyBathrooms,
-    } = this.state
+    } = this.props;
 
 		return (
       <div>
@@ -181,3 +193,60 @@ export default class Map extends Component {
 
 Map.propTypes = propTypes;
 Map.defaultProps = defaultProps;
+
+const mapStateToProps = (state) => {
+  /**
+    state:
+      userId: "sdfdss",
+      userLocation: undefined,
+      lines: {},
+      messages: [],
+      nearbyBathrooms: [],
+   */
+  const {
+    userId,
+    userLocation,
+    nearbyBathrooms,
+  } = state;
+
+  return {
+      userId,
+      userLocation,
+      nearbyBathrooms,
+  };
+}
+
+//const mapDispatchToProps = (dispatch, ownProps) => {
+//  //initiated by actions
+//  //put in a container component that
+//  return {
+//    updateUserLocation,
+//    addBathrooms,
+//    removeBathrooms,
+//    updateUserId,
+//    setBathroomToUnoccupied,
+//    setBathroomToOccupied,
+//    hideBathroomTooltip,
+//    showBathroomTooltip,
+//  };
+//}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  //initiated by actions
+  //put in a container component that
+  return {
+    updateUserLocation: location => dispatch(updateUserLocation(location)),
+    addBathrooms: bs => dispatch(addBathrooms(bs)),
+    removeBathrooms: bs => dispatch(removeBathrooms(bs)),
+    updateUserId: id => dispatch(updateUserId(id)),
+    setBathroomToUnoccupied: bId => dispatch(setBathroomToUnoccupied(bId)),
+    setBathroomToOccupied: bId => dispatch(setBathroomToOccupied(bId)),
+    hideBathroomTooltip: bId => dispatch(hideBathroomTooltip(bId)),
+    showBathroomTooltip: bId => dispatch(showBathroomTooltip(bId)),
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Map)
