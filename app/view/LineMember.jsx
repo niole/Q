@@ -6,7 +6,7 @@ const { string, func, number } = PropTypes;
 const propTypes = {
   userRank: number.isRequired,
   rankLineMember: number.isRequired,
-  userId: string.isRequired,
+  userId: string,
   bathroomId: string.isRequired,
 };
 
@@ -24,7 +24,7 @@ export default class LineMember extends Component {
       userId,
     } = this.props;
 
-    const url = 'routes/linemember/cut';
+    const url = `routes/linemember/${bathroomId}/${userId}/cut`;
 
     $.ajax({
       url,

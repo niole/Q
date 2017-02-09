@@ -29,7 +29,7 @@ export default function appReducer(state = initialState, action) {
     case SHOW_BATHROOM_TOOLTIP:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (b._id === action.data) {
+          if (b.id === action.data) {
             b.showTooltip = true;
           } else if (b.showTooltip) {
             b.showTooltip = false;
@@ -43,7 +43,7 @@ export default function appReducer(state = initialState, action) {
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
           //currently hides all tooltips
-          if (b._id === action.data) {
+          if (b.id === action.data) {
             b.showTooltip = false;
             b.infoWindow.close();
           }
@@ -55,7 +55,7 @@ export default function appReducer(state = initialState, action) {
     case SET_BATHROOM_OCCUPIED:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (b._id === action.data) {
+          if (b.id === action.data) {
             b.occupied = true;
           }
           return b;
@@ -65,7 +65,7 @@ export default function appReducer(state = initialState, action) {
     case SET_BATHROOM_UNOCCUPIED:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (b._id === action.data) {
+          if (b.id === action.data) {
             b.occupied = false;
           }
           return b;
@@ -89,7 +89,7 @@ export default function appReducer(state = initialState, action) {
 
     case REMOVE_BATHROOMS:
       return Object.assign({}, state, {
-        nearbyBathrooms: state.nearbyBathrooms.filter(b => action.data.indexOf(b._id) === -1),
+        nearbyBathrooms: state.nearbyBathrooms.filter(b => action.data.indexOf(b.id) === -1),
       });
 
     case UPDATE_LINE_RANK:
@@ -100,12 +100,14 @@ export default function appReducer(state = initialState, action) {
 
     case REMOVE_FROM_LINE:
       const newLines = Object.assign({}, state.lines);
-      delete newLines[action.data];
+      const bId = parseInt(action.data);
+
+      delete newLines[bId];
 
       return Object.assign({}, state, {
         lines: newLines,
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (action.data === b._id) {
+          if (bId === b.id) {
             b.lineLength -= 1;
           }
           return b;
@@ -116,7 +118,7 @@ export default function appReducer(state = initialState, action) {
       return Object.assign({}, state, {
         lines: Object.assign(state.lines, action.data),
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (typeof action.data[b._id] === "number") {
+          if (typeof action.data[b.id] === "number") {
             b.lineLength += 1;
           }
           return b;
@@ -130,7 +132,7 @@ export default function appReducer(state = initialState, action) {
 
     case REMOVE_MSG:
       return Object.assign({}, state, {
-        messages: state.messages.filter(m => m._id !== action.data._id),
+        messages: state.messages.filter(m => m.id !== action.data.id),
       });
 
     default:

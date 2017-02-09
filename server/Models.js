@@ -27,7 +27,20 @@ const LineMember = sequelize.define(
   }
 );
 
-LineMember.sync({force: true});
+LineMember.sync({force: true}).then(function() {
+  return LineMember.create({
+    bathroomId: 1,
+    rank: 0,
+    userId: 1
+  }).then(function() {
+    LineMember.create({
+      bathroomId: 1,
+      rank: 1,
+      userId: 2
+    });
+  });
+
+});
 
 const Message = sequelize.define(
   'message',
@@ -57,7 +70,7 @@ const Message = sequelize.define(
 Message.sync({force: true});
 
 const User = sequelize.define(
-  'user',
+  'users',
   {
     username: {
       type: Sequelize.STRING,
@@ -75,8 +88,18 @@ const User = sequelize.define(
 
 User.sync({force: true}).then(function () {
   return User.create({
-    username: "niole",
+    username: "u1",
     money: 100.0
+  }).then(function() {
+    User.create({
+      username: "u2",
+      money: 100.0
+    }).then(function() {
+      User.create({
+        username: "niole",
+        money: 100.0
+      });
+    });
   });
 });
 
@@ -88,11 +111,11 @@ const Bathroom = sequelize.define(
       field: 'occupied'
     },
     latitude: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.FLOAT,
       field: 'lat'
     },
     longitude: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.FLOAT,
       field: 'lng'
     },
     lineLength: {
@@ -105,7 +128,15 @@ const Bathroom = sequelize.define(
   }
 );
 
-Bathroom.sync({force: true});
+Bathroom.sync({force: true}).then(function () {
+  return Bathroom.create({
+    occupied: true,
+    latitude: 51.5073,
+    longitude: -0.1222,
+    lineLength: 2,
+  });
+});
+
 
 module.exports = {
   Bathroom: Bathroom,

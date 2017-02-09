@@ -19,8 +19,8 @@ const propTypes = {
   location: arrayOf(number.isRequired).isRequired,
   lineLength: number.isRequired,
   shouldOpen: bool.isRequired,
-  userId: string.isRequired,
-  bathroomId: string.isRequired,
+  userId: number.isRequired,
+  bathroomId: number.isRequired,
   target: object,
   userRank: number,
 };
@@ -179,7 +179,7 @@ ToolTip.propTypes = propTypes;
 ToolTip.defaultProps = defaultProps;
 
 const mapStateToProps = (state, ownProps) => {
-  const bathroom = state.nearbyBathrooms.find(b => b._id === ownProps.bathroomId);
+  const bathroom = state.nearbyBathrooms.find(b => b.id === ownProps.bathroomId);
   return {
     userRank: state.lines[ownProps.bathroomId],
     lineLength: bathroom ? bathroom.lineLength : 0,

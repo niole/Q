@@ -12,7 +12,7 @@ export default class App extends Component {
 		return (
       <div className="landing-page">
         <Map
-          userId={ "sdfdss" }
+          userId={ 3 }
         />
       </div>
 		);

@@ -19,7 +19,7 @@ import {
 const { bool, arrayOf, string, object, node, number } = PropTypes;
 const propTypes = {
   userLocation: arrayOf(number),
-  userId: string.isRequired,
+  userId: number.isRequired,
   nearbyBathrooms: arrayOf(object),
 };
 const defaultProps = {
@@ -73,14 +73,14 @@ class Map extends Component {
     const {
       showBathroomTooltip,
     } = this.props;
-    showBathroomTooltip(b._id);
+    showBathroomTooltip(b.id);
   }
 
   getNearbyBathrooms(userLocation) {
     const {
       addBathrooms
     } = this.props;
-    const url = 'routes/bathrooms/near/:lat/:lng'.replace(":lat", userLocation[0]).replace(":lng", userLocation[1]);
+    const url = `routes/bathrooms/near/${userLocation[0]}/${userLocation[1]}`;
 
     $.ajax({
       url,
@@ -94,7 +94,7 @@ class Map extends Component {
           });
 
           const infoWindow = new google.maps.InfoWindow({
-            content: ReactDOMServer.renderToString(<div id={ `${b._id}-tooltip` }/>)
+            content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` }/>)
           });
 
           const boundListener = this.handleBathroomClick.bind(this, b);
@@ -115,7 +115,7 @@ class Map extends Component {
             lng: b.longitude,
             showTooltip: false,
             lineLength: b.lineLength,
-            _id: b._id,
+            id: b.id,
           };
         });
 
@@ -153,9 +153,9 @@ class Map extends Component {
       if (b.showTooltip) {
           return (
             <ToolTip
-              bathroomId={ b._id }
+              bathroomId={ b.id }
               location={ [b.lat, b.lng] }
-              target={ document.getElementById(`${b._id}-tooltip`) }
+              target={ document.getElementById(`${b.id}-tooltip`) }
               shouldOpen={ true }
               userId={ userId }
               closeTooltip={ this.closeTooltip }

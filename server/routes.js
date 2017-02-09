@@ -10,104 +10,161 @@ const Message = models.Message;
 const sequelize = models.sequelize;
 
 
-let user = {
-  money: 10,
-  _id: "sdfdss"
-};
-
-let lineMember = {
-    _id: "ddfff",
-    bathroomId: "0090900",
-    rank: -1,
-    userId: ""
-};
-
-let message = {
-    _id: "344sfsdf",
-    bathroomId: "",
-    fromId: "",
-    toId: "",
-    money: 0
-};
-
-let bathroom = {
-  _id: "222344sfsdf",
-  occupied: false,
-  latitude: 51.5073,
-  longitude: -0.1222,
-  lineLength: 1,
-};
-
 //get user
 router.get('/user/:id', function(req, res) {
-    res.send(user);
+    User.findAll({
+      where: {
+        id: req.params.id
+      }
+    }).then(function(user) {
+      if (user) {
+        res.send(user);
+      }
+    });
 });
 
 //update user's money
 router.post('/user/:id/:money', function(req, res) {
-    user.money += req.params.money;
-    res.send(user);
+    User.update({
+      money: req.params.money,
+    }).then(function(user) {
+      if (user) {
+        res.send(user);
+      }
+    });
 });
 
 //get user's line locations
 router.get('/linemember/:userid', function(req, res) {
-  if (lineMember.userId === req.params.userid) {
-    res.send(lineMember);
-  }
+    const userid = req.params.userid;
+
+    LineMember.findAll({
+      userId: userid,
+    }).then(function(lineMembers) {
+      if (lineMembers) {
+        res.send(lineMembers);
+      }
+    });
+
 });
 
 //enter line at bathroom
 router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
-  //req's data contains lat long
-  lineMember.userId = req.params.userid;
-  lineMember.bathroomId = req.params.bathroomid;
+  const bathroomId = req.params.bathroomid;
+  const userId = req.params.userid;
 
-  //update length of bathroom line
-  bathroom.lineLength += 1;
+  Bathroom.findAll({
+    where: {
+      id: bathroomId
+    }
+  }).then(function(bathroom) {
+    if (bathroom[0].dataValues) {
+      bathroom = bathroom[0].dataValues;
+      const nextLineLength = bathroom.lineLength+1;
 
-  //update user rank
-  lineMember.rank = bathroom.lineLength;
+      Bathroom.update({
+          lineLength: nextLineLength
+        }, {
+          where: {
+            id: bathroomId
+          }
+      }).then(function() {
 
-  res.send({
-    bathroomId: req.params.bathroomid,
-    rank: lineMember.rank,
+          LineMember.create({
+            bathroomId: bathroom.id,
+            rank: nextLineLength,
+            userId: userId
+          }).then(function() {
+            res.send({
+              bathroomId: bathroom.id,
+              rank: nextLineLength,
+            });
+          });
+
+      });
+    }
   });
+
 });
 
 //enter bathroom
 router.get('/linemember/:linememberid/enter', function(req, res) {
-  lineMember.rank = 0; //TODO rank should be determined by actual data in database
+  const linememberid = req.params.linememberid;
 
-  //send req to update relevent bathroom
-  if (bathroom._id === lineMember.bathroomId) {
-    bathroom.occupied = true;
-  }
+  LineMember.update({
+    rank: 0,
+  }, {
+    where: {
+      id: linememberid
+    }
+  }).then(function(lineMembers) {
+    res.send(lineMembers);
+  });
 
-  //TODO update ranking of all other linemembers
-
-  res.send(lineMember);
 });
 
 //leave bathroom/line
 router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
-  //TODO should actually delete record
-  //but instead will set lineMember rank to -1
+  const userId = req.params.userId;
+  const bathroomId = req.params.bathroomId;
 
-  lineMember.rank = -1;
+  LineMember.findAll({
+    where: {
+      userId: userId,
+      bathroomId: bathroomId,
+    }
+  }).then(function(data) {
+    const lm = data[0].dataValues;
 
-  res.send(req.params.bathroomId);
+    LineMember.destroy({
+      where: {
+        userId: userId,
+        bathroomId: bathroomId,
+      }
+    }).then(function() {
+      Bathroom.update({
+        lineLength: sequelize.literal('line_length - 1')
+      }, {
+        where: {
+          id: bathroomId
+        }
+      }).then(function() {
+        //update all that were of rank higher than the
+        //destroyed line member
+        LineMember.update({
+          rank: sequelize.literal('rank - 1')
+        }, {
+          where: {
+            rank: {
+              $gt: lm.rank
+            }
+          }
+        }).then(function() {
+          res.send(bathroomId);
+        });
+      });
+    });
+  });
+
 });
 
 //send cut request
-router.post('/linemember/cut', function(req, res) {
-  console.log(req.body);
+router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
 
-  message.fromId = req.body.userId;
-  message.toId = req.body.userId; //TODO in future, figure out who's at that rank in that bathroom line
+  const toId = req.body.userId;
+  const money = req.body.money;
+  const fromId = req.params.userId;
+  const bathroomId = req.params.bathroomId;
 
-  message = Object.assign(message, req.body);
+  Message.create({
+    bathroomId: bathroomId,
+    fromId: fromId,
+    toId: toId,
+    money: money
+  }).then(function(ms) {
+    res.send(ms);
+  });
 
-  res.send(message);
 });
 
 
@@ -119,7 +176,10 @@ router.get('/messages/:userid', function(req, res) {
 });
 
 router.get('/bathrooms/near/:lat/:lng', function(req, res) {
-  res.send([bathroom]);
+  //TODO use lat lng info
+  Bathroom.findAll().then(function(bathrooms) {
+    res.send(bathrooms);
+  });
 });
 
 module.exports = router;
