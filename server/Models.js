@@ -133,7 +133,7 @@ Bathroom.sync({force: true}).then(function () {
     occupied: true,
     latitude: 51.5073,
     longitude: -0.1222,
-    lineLength: 2,
+    lineLength: 1,
   });
 });
 

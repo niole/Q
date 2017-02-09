@@ -6,8 +6,8 @@ const { string, func, number } = PropTypes;
 const propTypes = {
   userRank: number.isRequired,
   rankLineMember: number.isRequired,
-  userId: string,
-  bathroomId: string.isRequired,
+  userId: number.isRequired,
+  bathroomId: number.isRequired,
 };
 
 export default class LineMember extends Component {
@@ -30,13 +30,11 @@ export default class LineMember extends Component {
       url,
       type: "POST",
       data: {
-        fromId: userId,
-        bathroomId: bathroomId,
         rankLineMember: rankLineMember,
         money: 1,
       },
       dataType: "json",
-      success: () => {
+      success: message => {
         console.log('success');
       },
       error: e => console.log(e)

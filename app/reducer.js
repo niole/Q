@@ -17,7 +17,7 @@ import {
 
 
 const initialState = {
-  userId: "sdfdss",
+  userId: 3,
   userLocation: undefined,
   lines: {},
   messages: [],

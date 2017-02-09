@@ -151,18 +151,30 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
 //send cut request
 router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
 
-  const toId = req.body.userId;
-  const money = req.body.money;
+  const rankOfAddressee = req.body.rankLineMember;
   const fromId = req.params.userId;
+  const money = req.body.money;
   const bathroomId = req.params.bathroomId;
 
-  Message.create({
-    bathroomId: bathroomId,
-    fromId: fromId,
-    toId: toId,
-    money: money
-  }).then(function(ms) {
-    res.send(ms);
+  LineMember.findAll({
+    where: {
+      bathroomId: bathroomId,
+      rank: rankOfAddressee
+    }
+  }).then(function(data) {
+    const lmData = data[0].dataValues;
+    if (lmData) {
+      Message.create({
+        bathroomId: bathroomId,
+        fromId: fromId,
+        toId: lmData.userId,
+        money: money
+      }).then(function(ms) {
+        if (ms) {
+          res.send(ms.dataValues);
+        }
+      });
+    }
   });
 
 });
