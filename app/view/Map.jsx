@@ -13,47 +13,83 @@ import {
   setBathroomToOccupied,
   hideBathroomTooltip,
   showBathroomTooltip,
+  bulkUpdatePrimitives,
 } from '../actions.js';
 
 
+const endNumberPattern = /.+\/([0-9]+)/;
 const { bool, arrayOf, string, object, node, number } = PropTypes;
 const propTypes = {
   userLocation: arrayOf(number),
   userId: number.isRequired,
   nearbyBathrooms: arrayOf(object),
 };
-const defaultProps = {
-  userLocation: [51.508742,-0.120850],
-};
 
 class Map extends Component {
   constructor() {
     super();
-
-    navigator.geolocation.getCurrentPosition(locationData =>{
-      if (locationData && locationData.coords) {
-        const {
-          updateUserLocation,
-        } = this.props;
-        const {
-          longitude,
-          latitude,
-        } = locationData.coords;
-        updateUserLocation([longitude, latitude]);
-      }
-    });
-
     this.map = null;
     this.closeTooltip = this.closeTooltip.bind(this);
+  }
+
+  componentWillReceiveProps(newProps) {
+    const oldLocation = this.props.userLocation;
+    const newLocation = newProps.userLocation;
+
+    if (oldLocation[0] !== newLocation[0] || oldLocation[1] !== newLocation[1]) {
+      this.map.panTo(new google.maps.LatLng(...newLocation));
+    }
   }
 
   componentDidMount() {
    const {
       userLocation,
     } = this.props;
+
     this.map = this.initMap(this.refs.map);
+
     this.updateUserLocation(null, userLocation);
-    this.getNearbyBathrooms(userLocation);
+
+    this.setInitialState(() => {
+      this.getNearbyBathrooms();
+    });
+  }
+
+  setInitialState(callback) {
+    const {
+      bulkUpdatePrimitives,
+    } = this.props;
+
+    navigator.geolocation.getCurrentPosition(locationData => {
+      let userLocation = this.props.userLocation;
+
+      if (false) { //locationData && locationData.coords) {
+        const {
+          longitude,
+          latitude,
+        } = locationData.coords;
+
+        userLocation = [longitude, latitude];
+      }
+
+      const userId = this.getUserIdFromURL();
+
+      bulkUpdatePrimitives({ userId, userLocation });
+      callback();
+    });
+  }
+
+  getUserIdFromURL() {
+    const url = window.location.href;
+    let userId = url.match(endNumberPattern);
+
+    if (userId) {
+      userId = parseInt(userId[1]);
+    } else {
+      userId = 0;
+    }
+
+    return userId;
   }
 
   updateUserLocation(oldLocation, newLocation) {
@@ -76,16 +112,23 @@ class Map extends Component {
     showBathroomTooltip(b.id);
   }
 
-  getNearbyBathrooms(userLocation) {
+  getNearbyBathrooms() {
     const {
+      userId,
+      userLocation,
       addBathrooms
     } = this.props;
-    const url = `routes/bathrooms/near/${userLocation[0]}/${userLocation[1]}`;
+    const url = `routes/bathrooms/near/${userLocation[0]}/${userLocation[1]}/${userId}`;
 
     $.ajax({
       url,
-      success: nearbyBathrooms => {
+      success: bathroomData => {
         console.log('success');
+
+        const {
+          nearbyBathrooms,
+          lineMembers,
+        } = bathroomData;
 
         const newNearByBathrooms = nearbyBathrooms.map(b => {
           const marker = new google.maps.Marker({
@@ -108,7 +151,7 @@ class Map extends Component {
             marker,
             infoWindow,
             unmountHandler: () => {
-              //TODO look into if this actuall works
+              //TODO this won't work
               google.maps.event.removeEventListener(marker, 'click', boundListener);
             },
             lat: b.latitude,
@@ -119,7 +162,7 @@ class Map extends Component {
           };
         });
 
-        addBathrooms(newNearByBathrooms);
+        addBathrooms({ newNearByBathrooms, lineMembers });
       },
       error: e => {
         console.log('error', e);
@@ -128,7 +171,7 @@ class Map extends Component {
   }
 
   initMap(ref) {
-    const {
+    let {
       userLocation,
     } = this.props;
 
@@ -136,6 +179,7 @@ class Map extends Component {
         center: new google.maps.LatLng(...userLocation),
         zoom: 14,
         mapTypeId: google.maps.MapTypeId.ROADMAP
+
     };
 
     return new google.maps.Map(ref, mapProp);
@@ -189,7 +233,6 @@ class Map extends Component {
 }
 
 Map.propTypes = propTypes;
-Map.defaultProps = defaultProps;
 
 const mapStateToProps = (state) => {
   /**
@@ -225,6 +268,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     setBathroomToOccupied: bId => dispatch(setBathroomToOccupied(bId)),
     hideBathroomTooltip: bId => dispatch(hideBathroomTooltip(bId)),
     showBathroomTooltip: bId => dispatch(showBathroomTooltip(bId)),
+    bulkUpdatePrimitives: stateObj => dispatch(bulkUpdatePrimitives(stateObj)),
   };
 }
 

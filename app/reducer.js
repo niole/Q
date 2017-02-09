@@ -13,12 +13,13 @@ import {
   SHOW_BATHROOM_TOOLTIP,
   HIDE_BATHROOM_TOOLTIP,
   ADD_TIME_IN_BATHROOM,
+  BULK_UPDATE_PRIMITIVES,
 } from './actions.js';
 
 
 const initialState = {
-  userId: 3,
-  userLocation: undefined,
+  userId: 0,
+  userLocation: [51.508742,-0.120850],
   lines: {},
   messages: [],
   nearbyBathrooms: [],
@@ -26,6 +27,9 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case BULK_UPDATE_PRIMITIVES:
+      return Object.assign({}, state, action.data);
+
     case SHOW_BATHROOM_TOOLTIP:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
@@ -84,7 +88,13 @@ export default function appReducer(state = initialState, action) {
 
     case ADD_BATHROOMS:
       return Object.assign({}, state, {
-        nearbyBathrooms: action.data.concat(state.nearbyBathrooms),
+        nearbyBathrooms: action.data.newNearByBathrooms.concat(state.nearbyBathrooms),
+        lines:  action.data.lineMembers.length ?
+          action.data.lineMembers.reduce((acc, lm) => {
+            acc[lm.bathroomId] = lm.rank;
+            return acc;
+          }, Object.assign({}, state.lines)) :
+          state.lines
       });
 
     case REMOVE_BATHROOMS:

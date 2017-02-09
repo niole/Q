@@ -176,9 +176,7 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
       });
     }
   });
-
 });
-
 
 //get user's messages
 router.get('/messages/:userid', function(req, res) {
@@ -187,10 +185,27 @@ router.get('/messages/:userid', function(req, res) {
   }
 });
 
-router.get('/bathrooms/near/:lat/:lng', function(req, res) {
-  //TODO use lat lng info
+router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {
+  const userId = req.params.userId;
+  const lat = req.params.lat;
+  const lng = req.params.lng;
+
   Bathroom.findAll().then(function(bathrooms) {
-    res.send(bathrooms);
+    LineMember.findAll({
+      where: {
+        userId: userId,
+        bathroomId: {
+          $in: bathrooms.map(function(b) {
+            return b.dataValues.id;
+          })
+        }
+      }
+    }).then(function(lms) {
+      res.send({
+        nearbyBathrooms: bathrooms,
+        lineMembers: lms.map(function(l) { return l.dataValues; })
+      });
+    });
   });
 });
 

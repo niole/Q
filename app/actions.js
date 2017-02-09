@@ -16,6 +16,14 @@ export const ADD_TIME_IN_BATHROOM = "addTimeInBathroom";
 export const UPDATE_USER_LOCATION = "updateUserLocation";
 export const UPDATE_USER_ID = "updateUserId";
 
+export const BULK_UPDATE_PRIMITIVES = "bulkUpdatePrimitivesOnly";
+
+export function bulkUpdatePrimitives(stateObj) {
+  return {
+    type: BULK_UPDATE_PRIMITIVES,
+    data: stateObj,
+  };
+}
 
 export function addTimeInBathroom(bathroomId) {
   return {
