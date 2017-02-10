@@ -18,6 +18,7 @@ export const UPDATE_USER_ID = "updateUserId";
 
 export const BULK_UPDATE_PRIMITIVES = "bulkUpdatePrimitivesOnly";
 
+
 export function bulkUpdatePrimitives(stateObj) {
   return {
     type: BULK_UPDATE_PRIMITIVES,

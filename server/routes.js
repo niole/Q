@@ -1,13 +1,18 @@
 "use strict";
 const express = require('express');
 const router = express.Router();
+const s = require('../expressAppInstance.js');
+const io = require('socket.io')(s.server);
 const models = require('./Models.js');
+const actions = require('../app/serverActions.js');
 
 const Bathroom = models.Bathroom;
 const User = models.User;
 const LineMember = models.LineMember;
 const Message = models.Message;
 const sequelize = models.sequelize;
+
+s.app.set('socketio', io);
 
 
 //get user
@@ -75,6 +80,7 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
             rank: nextLineLength,
             userId: userId
           }).then(function() {
+
             res.send({
               bathroomId: bathroom.id,
               rank: nextLineLength,
@@ -108,14 +114,12 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
   const userId = req.params.userId;
   const bathroomId = req.params.bathroomId;
 
-  LineMember.findAll({
+  LineMember.find({
     where: {
       userId: userId,
       bathroomId: bathroomId,
     }
-  }).then(function(data) {
-    const lm = data[0].dataValues;
-
+  }).then(function(goneLineMember) {
     LineMember.destroy({
       where: {
         userId: userId,
@@ -126,9 +130,9 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
         lineLength: sequelize.literal('line_length - 1')
       }, {
         where: {
-          id: bathroomId
+          id: bathroomId,
         }
-      }).then(function() {
+      }).then(function(bathroom) {
         //update all that were of rank higher than the
         //destroyed line member
         LineMember.update({
@@ -136,16 +140,39 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
         }, {
           where: {
             rank: {
-              $gt: lm.rank
+              $gt: goneLineMember.rank
             }
           }
         }).then(function() {
-          res.send(bathroomId);
-        });
+          //must notify all users that
+          //their rank has changed and
+          //the length of their bathroom line has gotten shorter
+
+          LineMember.findAll({
+            where: {
+              bathroomId: bathroomId,
+            }
+          }).then(function(remainingLineMembers) {
+            Bathroom.find({
+              where: {
+                id: bathroomId,
+              }
+            }).then(function(bathroom) {
+              const bathroomData = bathroom.dataValues;
+
+              remainingLineMembers.forEach(function(remaining) {
+                const remData = remaining.dataValues;
+                const io = req.app.get('socketio');
+                io.emit(remData.userId, actions.messageReceivedLeftLine(bathroomData.id, remData.rank, bathroomData.lineLength));
+              });
+
+              res.send(bathroomId);
+            });
+          });
+         });
       });
     });
   });
-
 });
 
 //send cut request
@@ -186,6 +213,7 @@ router.get('/messages/:userid', function(req, res) {
 });
 
 router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {
+
   const userId = req.params.userId;
   const lat = req.params.lat;
   const lng = req.params.lng;

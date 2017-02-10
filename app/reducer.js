@@ -14,6 +14,8 @@ import {
   HIDE_BATHROOM_TOOLTIP,
   ADD_TIME_IN_BATHROOM,
   BULK_UPDATE_PRIMITIVES,
+  MSG_LEFT_LINE,
+  MSG_ENTER_LINE,
 } from './actions.js';
 
 
@@ -27,6 +29,17 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case MSG_LEFT_LINE:
+      return Object.assign({}, state, {
+        lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),
+        nearbyBathrooms: state.nearbyBathrooms.map(b => {
+          if (b.id === action.data.bathroomId) {
+            b.lineLength = action.data.lineLength;
+          }
+          return b;
+        })
+      });
+
     case BULK_UPDATE_PRIMITIVES:
       return Object.assign({}, state, action.data);
 

@@ -15,6 +15,7 @@ import {
   showBathroomTooltip,
   bulkUpdatePrimitives,
 } from '../actions.js';
+import messageHandler from '../messageHandler.js';
 
 
 const endNumberPattern = /.+\/([0-9]+)/;
@@ -29,12 +30,19 @@ class Map extends Component {
   constructor() {
     super();
     this.map = null;
+    this.messageHandler = messageHandler(); //TODO not sure if need to hold onto this here
     this.closeTooltip = this.closeTooltip.bind(this);
   }
 
   componentWillReceiveProps(newProps) {
     const oldLocation = this.props.userLocation;
     const newLocation = newProps.userLocation;
+
+    if (newProps.userId !== this.props.userId) {
+      //update message handler
+      this.messageHandler = messageHandler();
+    }
+
 
     if (oldLocation[0] !== newLocation[0] || oldLocation[1] !== newLocation[1]) {
       this.map.panTo(new google.maps.LatLng(...newLocation));
@@ -123,8 +131,6 @@ class Map extends Component {
     $.ajax({
       url,
       success: bathroomData => {
-        console.log('success');
-
         const {
           nearbyBathrooms,
           lineMembers,

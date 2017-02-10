@@ -1,11 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import reducer from './reducer.js';
 import App from './view/App.jsx';
+import store from './store.js';
 
-const store = createStore(reducer);
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
