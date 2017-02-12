@@ -1,7 +1,8 @@
-import React, {PropTypes, Component} from 'react';
+import React, {PropTypes} from 'react';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import MUIBaseTheme from './MUIBaseTheme.jsx';
+import Message from './Message.jsx';
 
 
 const { object, arrayOf } = PropTypes;
@@ -16,15 +17,17 @@ const defaultProps = {
 export default class MessagesBar extends MUIBaseTheme {
 	render() {
    return (
-      <Paper zDepth={1}>
+      <Paper
+        style={{ height: "100px" }}
+        zDepth={1}>
         <BottomNavigation selectedIndex={0}>
           <BottomNavigationItem
             label="Messages"
             icon={ <div className="message-icon"/> }
             onTouchTap={() => this.select(0)}
-            style={{ float: "left" }}
+            style={{ left: 0 }}
           />
-          { this.props.messages.map(m => <Paper zDepth={2}>{ JSON.stringify(m) }</Paper>) }
+          { this.props.messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
         </BottomNavigation>
       </Paper>
     );

@@ -263,9 +263,16 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
 
 //get user's messages
 router.get('/messages/:userid', function(req, res) {
-  if (message.toId === req.params.userid) {
-    res.send([message]);
-  }
+  const userId = req.params.userid;
+
+  Message.findAll({
+    where: {
+      toId: userId,
+    }
+  }).then(function(messageData) {
+    const messages = messageData.map(function(m) { return m.dataValues; });
+    res.send(messages);
+  });
 });
 
 router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {

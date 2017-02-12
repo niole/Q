@@ -140,22 +140,31 @@ class Map extends Component {
       bulkUpdatePrimitives,
     } = this.props;
 
-    navigator.geolocation.getCurrentPosition(locationData => {
-      let userLocation = this.props.userLocation;
+    const userId = this.getUserIdFromURL(); //TODO this is just a hack
+    const url = `routes/messages/${userId}`;
 
-      if (false) { //locationData && locationData.coords) {
-        const {
-          longitude,
-          latitude,
-        } = locationData.coords;
+    $.ajax({
+      url,
+      success: messages => {
+        navigator.geolocation.getCurrentPosition(locationData => {
+          let userLocation = this.props.userLocation;
 
-        userLocation = [longitude, latitude];
+          if (false) { //locationData && locationData.coords) { //TODO this is also just a hack
+            const {
+              longitude,
+              latitude,
+            } = locationData.coords;
+
+            userLocation = [longitude, latitude];
+          }
+
+          bulkUpdatePrimitives({ userId, userLocation, messages });
+          callback();
+        });
+      },
+      error: err => {
+        console.log('error', err);
       }
-
-      const userId = this.getUserIdFromURL();
-
-      bulkUpdatePrimitives({ userId, userLocation });
-      callback();
     });
   }
 
