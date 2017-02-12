@@ -18,4 +18,6 @@ function messageReceivedLeftLine(bathroomId, newRank, lineLength) {
 module.exports = {
   messageReceivedLeftLine: messageReceivedLeftLine,
   messageReceivedEnterLine: messageReceivedEnterLine,
+  MSG_LEFT_LINE: MSG_LEFT_LINE,
+  MSG_ENTER_LINE: MSG_ENTER_LINE,
 };

@@ -15,7 +15,6 @@ import {
   showBathroomTooltip,
   bulkUpdatePrimitives,
 } from '../actions.js';
-import messageHandler from '../messageHandler.js';
 
 
 const endNumberPattern = /.+\/([0-9]+)/;
@@ -30,7 +29,8 @@ class Map extends Component {
   constructor() {
     super();
     this.map = null;
-    this.messageHandler = messageHandler(); //TODO not sure if need to hold onto this here
+    this.messageHandler = null;
+
     this.closeTooltip = this.closeTooltip.bind(this);
   }
 
@@ -40,7 +40,7 @@ class Map extends Component {
 
     if (newProps.userId !== this.props.userId) {
       //update message handler
-      this.messageHandler = messageHandler();
+      this.messageHandler = this.setUpMessageHandler(newProps.userId.toString());
     }
 
 
@@ -54,12 +54,27 @@ class Map extends Component {
       userLocation,
     } = this.props;
 
+    this.messageHandler = this.setUpMessageHandler();
     this.map = this.initMap(this.refs.map);
 
     this.updateUserLocation(null, userLocation);
 
     this.setInitialState(() => {
       this.getNearbyBathrooms();
+    });
+  }
+
+  setUpMessageHandler(id) {
+    const {
+      handleLineLeave
+    } = this.props;
+    const socket = io.connect();
+
+    return socket.on(id, function(msg) {
+      //based on what the message is, dispatch an action
+      //msg must be an actionType: { type: TYPE, data: ... }
+      console.log(msg);
+      handleLineLeave(msg);
     });
   }
 
@@ -241,14 +256,6 @@ class Map extends Component {
 Map.propTypes = propTypes;
 
 const mapStateToProps = (state) => {
-  /**
-    state:
-      userId: "sdfdss",
-      userLocation: undefined,
-      lines: {},
-      messages: [],
-      nearbyBathrooms: [],
-   */
   const {
     userId,
     userLocation,
@@ -275,6 +282,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     hideBathroomTooltip: bId => dispatch(hideBathroomTooltip(bId)),
     showBathroomTooltip: bId => dispatch(showBathroomTooltip(bId)),
     bulkUpdatePrimitives: stateObj => dispatch(bulkUpdatePrimitives(stateObj)),
+    handleLineLeave: message => dispatch(message),
   };
 }
 

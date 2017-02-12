@@ -13,6 +13,7 @@ const Message = models.Message;
 const sequelize = models.sequelize;
 
 s.app.set('socketio', io);
+let emitter;
 
 
 //get user
@@ -162,8 +163,8 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
 
               remainingLineMembers.forEach(function(remaining) {
                 const remData = remaining.dataValues;
-                const io = req.app.get('socketio');
-                io.emit(remData.userId, actions.messageReceivedLeftLine(bathroomData.id, remData.rank, bathroomData.lineLength));
+                emitter = req.app.get('socketio');
+                emitter.emit(remData.userId, actions.messageReceivedLeftLine(bathroomData.id, remData.rank, bathroomData.lineLength));
               });
 
               res.send(bathroomId);
