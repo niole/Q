@@ -63,9 +63,13 @@ router.post('/user/:id/:money', function(req, res) {
 //get specific linemember record
 router.get('/linemember/:bathroomId/:userid', function(req, res) {
     const userid = req.params.userid;
+    const bathroomId = req.params.bathroomId;
 
     LineMember.find({
-      userId: userid,
+      where: {
+        userId: userid,
+        bathroomId: bathroomId,
+      }
     }).then(function(lineMember) {
       const data = lineMember.dataValues;
       res.send(data);
@@ -168,7 +172,7 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
         userId: userId,
         bathroomId: bathroomId,
       }
-    }).then(function(goneLineMember) {
+    }).then(function() {
       Bathroom.update({
         lineLength: sequelize.literal('line_length - 1')
       }, {
@@ -182,11 +186,12 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
           rank: sequelize.literal('rank - 1')
         }, {
           where: {
+            bathroomId: bathroomId,
             rank: {
               $gt: goneLineMember.rank
             }
           }
-        }).then(function() {
+        }).then(function(s) {
           Bathroom.find({
             where: {
               id: bathroomId,
@@ -197,7 +202,7 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
               const bathroomData = bathroom.dataValues;
 
               User.findAll({
-                where: queryHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude)
+                where: queryHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude, userId)
               }).then(function(nearby) {
 
                 nearby.forEach(function(user) {
