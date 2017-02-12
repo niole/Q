@@ -20,6 +20,7 @@ import {
   MSG_LEFT_LINE,
   MSG_ENTER_LINE,
   MSG_UPDATE_LINE_LINE_MEMBER,
+  MSG_RECEIVED_CUT_MESSAGE,
 } from './serverActions.js';
 
 
@@ -33,6 +34,14 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case MSG_RECEIVED_CUT_MESSAGE:
+      if (action.data.toId === state.userId) {
+        return Object.assign({}, state, {
+          messages: [action.data].concat(state.messages),
+        });
+      }
+      return state;
+
     case MSG_UPDATE_LINE_LINE_MEMBER:
       return Object.assign({}, state, {
         lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),

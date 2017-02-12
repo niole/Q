@@ -20,7 +20,7 @@ import {
   messageReceivedUpdateLineLineMember,
   MSG_LEFT_LINE,
   MSG_ENTER_LINE,
-  MSG_UPDATE_LINE,
+  MSG_RECEIVED_CUT_MESSAGE,
 } from '../serverActions.js';
 
 
@@ -85,9 +85,9 @@ class Map extends Component {
         case MSG_LEFT_LINE:
           return this.handleLineLeave(msg);
         case MSG_ENTER_LINE:
-          return this.handleLineEnter(msg);
-        case MSG_UPDATE_LINE:
-          return;
+          return this.handleServerActionDispatch(msg);
+        case MSG_RECEIVED_CUT_MESSAGE:
+          return this.handleServerActionDispatch(msg);
         default:
           break;
       }
@@ -95,7 +95,7 @@ class Map extends Component {
     });
   }
 
-  handleLineEnter(msg) {
+  handleServerActionDispatch(msg) {
     //someone entered a line that you are near
     //this doesn't handle if you entered a line
     const {
@@ -322,14 +322,14 @@ class Map extends Component {
 	render() {
     const {
       nearbyBathrooms,
+      messages,
     } = this.props;
 
 		return (
       <div>
         <div id="map" ref="map"/>
         { this.showOpenToolTips(nearbyBathrooms) }
-        <MessagesBar
-        />
+        <MessagesBar messages={ messages }/>
       </div>
 		);
 	}
@@ -343,6 +343,7 @@ const mapStateToProps = (state) => {
     userLocation,
     nearbyBathrooms,
     lines,
+    messages,
   } = state;
 
   return {
@@ -350,6 +351,7 @@ const mapStateToProps = (state) => {
       userId,
       userLocation,
       nearbyBathrooms,
+      messages,
   };
 }
 

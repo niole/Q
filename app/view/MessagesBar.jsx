@@ -14,13 +14,6 @@ const defaultProps = {
 };
 
 export default class MessagesBar extends MUIBaseTheme {
-	constructor() {
-		super();
-
-		this.state = {
-		};
-	}
-
 	render() {
    return (
       <Paper zDepth={1}>
@@ -31,7 +24,7 @@ export default class MessagesBar extends MUIBaseTheme {
             onTouchTap={() => this.select(0)}
             style={{ float: "left" }}
           />
-          { this.props.messages.map(m => <Paper zDepth={2}>{ m }</Paper>) }
+          { this.props.messages.map(m => <Paper zDepth={2}>{ JSON.stringify(m) }</Paper>) }
         </BottomNavigation>
       </Paper>
     );

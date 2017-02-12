@@ -13,6 +13,8 @@ const LineMember = models.LineMember;
 const Message = models.Message;
 const sequelize = models.sequelize;
 
+const shouldBeInt = ["bathroomId", "fromId", "toId", "money", "userId"];
+
 s.app.set('socketio', io);
 let emitter;
 
@@ -229,13 +231,13 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
   const money = req.body.money;
   const bathroomId = req.params.bathroomId;
 
-  LineMember.findAll({
+  LineMember.find({
     where: {
       bathroomId: bathroomId,
       rank: rankOfAddressee
     }
   }).then(function(data) {
-    const lmData = data[0].dataValues;
+    const lmData = data.dataValues;
     if (lmData) {
       Message.create({
         bathroomId: bathroomId,
@@ -243,9 +245,17 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
         toId: lmData.userId,
         money: money
       }).then(function(ms) {
-        if (ms) {
-          res.send(ms.dataValues);
-        }
+        const message = shouldBeInt.reduce(function(m, key) {
+          if (typeof m[key] === "string") {
+            m[key] = parseInt(m[key]);
+          }
+          return m;
+        },  ms.dataValues);
+
+        emitter = req.app.get('socketio');
+        emitter.emit(message.toId, actions.messageReceivedCutMessage(message));
+
+        res.send(message);
       });
     }
   });
