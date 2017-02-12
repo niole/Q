@@ -5,7 +5,10 @@ const MSG_UPDATE_LINE_LINE_MEMBER = "messageLinememberUpdateLine";
 function messageReceivedEnterLine(bathroomId, lineLength) {
   return {
     type: MSG_ENTER_LINE,
-    data: { bathroomId, lineLength },
+    data: {
+      bathroomId,
+      lineLength
+    },
   };
 }
 

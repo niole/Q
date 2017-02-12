@@ -112,11 +112,22 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
             rank: nextLineLength,
             userId: userId
           }).then(function() {
+              User.findAll({
+                where: queryHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, userId)
+              }).then(function(nearby) {
 
-            res.send({
-              bathroomId: bathroom.id,
-              rank: nextLineLength,
-            });
+                nearby.forEach(function(user) {
+                  const userData = user.dataValues;
+                  emitter = req.app.get('socketio');
+                  emitter.emit(userData.id, actions.messageReceivedEnterLine(parseInt(bathroomId), nextLineLength));
+                });
+
+                res.send({
+                  bathroomId: bathroom.id,
+                  rank: nextLineLength,
+                });
+
+              });
           });
 
       });

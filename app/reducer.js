@@ -44,6 +44,16 @@ export default function appReducer(state = initialState, action) {
         })
       });
 
+    case MSG_ENTER_LINE:
+      return Object.assign({}, state, {
+        nearbyBathrooms: state.nearbyBathrooms.map(b => {
+          if (b.id === action.data.bathroomId) {
+            b.lineLength = action.data.lineLength;
+          }
+          return b;
+        })
+      });
+
     case MSG_LEFT_LINE:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {

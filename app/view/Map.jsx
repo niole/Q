@@ -19,6 +19,8 @@ import {
 import {
   messageReceivedUpdateLineLineMember,
   MSG_LEFT_LINE,
+  MSG_ENTER_LINE,
+  MSG_UPDATE_LINE,
 } from '../serverActions.js';
 
 
@@ -82,6 +84,10 @@ class Map extends Component {
       switch(msg.type) {
         case MSG_LEFT_LINE:
           return this.handleLineLeave(msg);
+        case MSG_ENTER_LINE:
+          return this.handleLineEnter(msg);
+        case MSG_UPDATE_LINE:
+          return;
         default:
           break;
       }
@@ -89,9 +95,19 @@ class Map extends Component {
     });
   }
 
+  handleLineEnter(msg) {
+    //someone entered a line that you are near
+    //this doesn't handle if you entered a line
+    const {
+      socketMessageDispatcher,
+    } = this.props;
+
+    socketMessageDispatcher(msg);
+  }
+
   handleLineLeave(msg) {
     const {
-      handleLineLeave,
+      socketMessageDispatcher,
       nearbyBathrooms,
       lines,
       userId,
@@ -106,7 +122,7 @@ class Map extends Component {
         $.ajax({
           url,
           success: lm => {
-            handleLineLeave(messageReceivedUpdateLineLineMember(msg.data.bathroomId, lm.rank, msg.data.lineLength));
+            socketMessageDispatcher(messageReceivedUpdateLineLineMember(msg.data.bathroomId, lm.rank, msg.data.lineLength));
           }, error: err => {
             console.log('error', err);
           }
@@ -114,7 +130,7 @@ class Map extends Component {
       } else {
         //if not in line but looking at tooltip, update data
         //will handle line length
-        handleLineLeave(msg);
+        socketMessageDispatcher(msg);
       }
     }
   }
@@ -350,7 +366,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     hideBathroomTooltip: bId => dispatch(hideBathroomTooltip(bId)),
     showBathroomTooltip: bId => dispatch(showBathroomTooltip(bId)),
     bulkUpdatePrimitives: stateObj => dispatch(bulkUpdatePrimitives(stateObj)),
-    handleLineLeave: message => dispatch(message),
+    socketMessageDispatcher: message => dispatch(message),
   };
 }
 
