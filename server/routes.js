@@ -1,6 +1,7 @@
 "use strict";
 const express = require('express');
 const router = express.Router();
+const queryHelpers = require('../app/queryHelpers.js');
 const s = require('../expressAppInstance.js');
 const io = require('socket.io')(s.server);
 const models = require('./Models.js');
@@ -15,6 +16,25 @@ const sequelize = models.sequelize;
 s.app.set('socketio', io);
 let emitter;
 
+//update user location
+router.post('/user/:userId/loc/update', function(req, res) {
+    const latitude = req.body.lat;
+    const longitude = req.body.lng;
+
+    User.update({
+        latitude: latitude,
+        longitude: longitude,
+      }, {
+      where: {
+        id: req.params.userId
+      }
+    }).then(function() {
+      res.send({
+        latitude: latitude,
+        longitude: longitude,
+      });
+    });
+});
 
 //get user
 router.get('/user/:id', function(req, res) {
@@ -40,6 +60,18 @@ router.post('/user/:id/:money', function(req, res) {
     });
 });
 
+//get specific linemember record
+router.get('/linemember/:bathroomId/:userid', function(req, res) {
+    const userid = req.params.userid;
+
+    LineMember.find({
+      userId: userid,
+    }).then(function(lineMember) {
+      const data = lineMember.dataValues;
+      res.send(data);
+    });
+});
+
 //get user's line locations
 router.get('/linemember/:userid', function(req, res) {
     const userid = req.params.userid;
@@ -51,7 +83,6 @@ router.get('/linemember/:userid', function(req, res) {
         res.send(lineMembers);
       }
     });
-
 });
 
 //enter line at bathroom
@@ -126,7 +157,7 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
         userId: userId,
         bathroomId: bathroomId,
       }
-    }).then(function() {
+    }).then(function(goneLineMember) {
       Bathroom.update({
         lineLength: sequelize.literal('line_length - 1')
       }, {
@@ -145,30 +176,28 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
             }
           }
         }).then(function() {
-          //must notify all users that
-          //their rank has changed and
-          //the length of their bathroom line has gotten shorter
-
-          LineMember.findAll({
+          Bathroom.find({
             where: {
-              bathroomId: bathroomId,
+              id: bathroomId,
             }
-          }).then(function(remainingLineMembers) {
-            Bathroom.find({
-              where: {
-                id: bathroomId,
-              }
-            }).then(function(bathroom) {
+          }).then(function(bathroom) {
+              //send out status update for every user that is near this bathroom
+              //as they might be looking at it and need the newest data
               const bathroomData = bathroom.dataValues;
 
-              remainingLineMembers.forEach(function(remaining) {
-                const remData = remaining.dataValues;
-                emitter = req.app.get('socketio');
-                emitter.emit(remData.userId, actions.messageReceivedLeftLine(bathroomData.id, remData.rank, bathroomData.lineLength));
+              User.findAll({
+                where: queryHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude)
+              }).then(function(nearby) {
+
+                nearby.forEach(function(user) {
+                  const userData = user.dataValues;
+                  emitter = req.app.get('socketio');
+                  emitter.emit(userData.id, actions.messageReceivedLeftLine(bathroomData.id, bathroomData.lineLength));
+                });
+
+                res.send(bathroomId);
               });
 
-              res.send(bathroomId);
-            });
           });
          });
       });

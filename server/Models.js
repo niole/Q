@@ -79,6 +79,14 @@ const User = sequelize.define(
     money: {
       type: Sequelize.FLOAT,
       field: 'money'
+    },
+    latitude: {
+      type: Sequelize.FLOAT,
+      field: 'lat'
+    },
+    longitude: {
+      type: Sequelize.FLOAT,
+      field: 'lng'
     }
   },
   {
@@ -89,15 +97,21 @@ const User = sequelize.define(
 User.sync({force: true}).then(function () {
   return User.create({
     username: "u1",
-    money: 100.0
+    money: 100.0,
+    latitude: 51.508742,
+    longitude: -0.120850,
   }).then(function() {
     User.create({
       username: "u2",
-      money: 100.0
+      money: 100.0,
+      latitude: 51.508742,
+      longitude: -0.120850,
     }).then(function() {
       User.create({
         username: "niole",
-        money: 100.0
+        money: 100.0,
+        latitude: 51.508742,
+        longitude: -0.120850,
       });
     });
   });

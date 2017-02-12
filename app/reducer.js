@@ -19,6 +19,7 @@ import {
 import {
   MSG_LEFT_LINE,
   MSG_ENTER_LINE,
+  MSG_UPDATE_LINE_LINE_MEMBER,
 } from './serverActions.js';
 
 
@@ -32,10 +33,19 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
-    case MSG_LEFT_LINE:
-      console.log('left line');
+    case MSG_UPDATE_LINE_LINE_MEMBER:
       return Object.assign({}, state, {
         lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),
+        nearbyBathrooms: state.nearbyBathrooms.map(b => {
+          if (b.id === action.data.bathroomId) {
+            b.lineLength = action.data.lineLength;
+          }
+          return b;
+        })
+      });
+
+    case MSG_LEFT_LINE:
+      return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
           if (b.id === action.data.bathroomId) {
             b.lineLength = action.data.lineLength;

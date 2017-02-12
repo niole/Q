@@ -16,6 +16,11 @@ import {
   bulkUpdatePrimitives,
 } from '../actions.js';
 
+import {
+  messageReceivedUpdateLineLineMember,
+  MSG_LEFT_LINE,
+} from '../serverActions.js';
+
 
 const endNumberPattern = /.+\/([0-9]+)/;
 const { bool, arrayOf, string, object, node, number } = PropTypes;
@@ -23,6 +28,7 @@ const propTypes = {
   userLocation: arrayOf(number),
   userId: number.isRequired,
   nearbyBathrooms: arrayOf(object),
+  lines: object,
 };
 
 class Map extends Component {
@@ -65,17 +71,52 @@ class Map extends Component {
   }
 
   setUpMessageHandler(id) {
-    const {
-      handleLineLeave
-    } = this.props;
     const socket = io.connect();
 
-    return socket.on(id, function(msg) {
+    return socket.on(id, msg => {
       //based on what the message is, dispatch an action
       //msg must be an actionType: { type: TYPE, data: ... }
-      console.log(msg);
-      handleLineLeave(msg);
+      //TODO if client is looking at bathroom and is in line, must do another request
+      //to get relevant data for tooltip
+
+      switch(msg.type) {
+        case MSG_LEFT_LINE:
+          return this.handleLineLeave(msg);
+        default:
+          break;
+      }
+
     });
+  }
+
+  handleLineLeave(msg) {
+    const {
+      handleLineLeave,
+      nearbyBathrooms,
+      lines,
+      userId,
+    } = this.props;
+    const updatedBathroomId = msg.data.bathroomId;
+    const bathroomId = nearbyBathrooms.find(b => b.id === updatedBathroomId).id;
+
+    if (typeof bathroomId === "number") {
+      if (typeof lines[updatedBathroomId] === "number") {
+        //if in line and looking at tooltip, get current rank and then update state
+        const url = `routes/linemember/${bathroomId}/${userId}`;
+        $.ajax({
+          url,
+          success: lm => {
+            handleLineLeave(messageReceivedUpdateLineLineMember(msg.data.bathroomId, lm.rank, msg.data.lineLength));
+          }, error: err => {
+            console.log('error', err);
+          }
+          });
+      } else {
+        //if not in line but looking at tooltip, update data
+        //will handle line length
+        handleLineLeave(msg);
+      }
+    }
   }
 
   setInitialState(callback) {
@@ -116,16 +157,41 @@ class Map extends Component {
   }
 
   updateUserLocation(oldLocation, newLocation) {
-   if (oldLocation) {
-    //TODO remove user from old location
-    //remove bathrooms that aren't nearby anymore
-   }
+    const {
+      updateUserLocation,
+    } = this.props;
 
-   const marker = new google.maps.Marker({
-     position: { lat: newLocation[0], lng: newLocation[1] },
-      map: this.map,
-      icon: '../user_loc_icon.png'
+    if (oldLocation) {
+     //TODO remove user from old location
+     //remove bathrooms that aren't nearby anymore
+    }
+
+    const newPosition = {
+      lat: newLocation[0],
+      lng: newLocation[1],
+    };
+
+    const url = 'routes/user/:userId/loc/update';
+
+    $.ajax({
+      url,
+      type: "POST",
+      dataType: "json",
+      data: newPosition,
+      error: err => {
+        console.log('err', err);
+      },
+      success: d => {
+        console.log('success', d);
+      }
     });
+
+
+    const marker = new google.maps.Marker({
+      position: newPosition,
+       map: this.map,
+       icon: '../user_loc_icon.png'
+     });
   }
 
   handleBathroomClick(b) {
@@ -260,9 +326,11 @@ const mapStateToProps = (state) => {
     userId,
     userLocation,
     nearbyBathrooms,
+    lines,
   } = state;
 
   return {
+      lines,
       userId,
       userLocation,
       nearbyBathrooms,
