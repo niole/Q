@@ -261,6 +261,103 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
   });
 });
 
+//accept a message
+router.post('/messages/accept', function(req, res) {
+  const message = req.body;
+
+  Message.destroy({
+    where: {
+      id: message.id
+    }
+  }).then(function() {
+    User.update({
+      money: sequelize.literal(`money - ${message.money}`),
+    }, {
+      where: {
+        id: message.fromId
+      }
+    }).then(function() {
+      User.update({
+          money: sequelize.literal(`money + ${message.money}`)
+        }, {
+          where: {
+            id: message.toId
+          }
+      }).then(function() {
+        //update relevant user's ranks in line
+
+        LineMember.find({
+          where: {
+            bathroomId: message.bathroomId,
+            userId: message.toId
+          }
+        }).then(function(toLm) {
+          const toLineMember = toLm.dataValues;
+
+          LineMember.find({
+            where: {
+              bathroomId: message.bathroomId,
+              userId: message.fromId
+            }
+          }).then(function(fromLm) {
+            const fromLineMember = fromLm.dataValues;
+
+            LineMember.update({
+              rank: toLineMember.rank
+            }, {
+              where: {
+                bathroomId: message.bathroomId,
+                userId: message.fromId
+              }
+            }).then(function() {
+              LineMember.update({
+                rank: sequelize.literal('rank + 1')
+              }, {
+                where: {
+                  bathroomId: message.bathroomId,
+                  rank: {
+                    $gte: toLineMember.rank,
+                    $lt: fromLineMember.rank
+                  },
+                  id: {
+                    $ne: fromLineMember.id
+                  }
+                }
+              }).then(function() {
+                //broadcast that these changes have happened to
+                //everyone near this bathroom
+                Bathroom.find({
+                  where: {
+                    id: message.bathroomId
+                  }
+                }).then(function(bathroomData) {
+                  const bathroom = bathroomData.dataValues;
+
+                  User.findAll({
+                    where: queryHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, message.toId)
+                  }).then(function(nearby) {
+                    //nearby includes whoever sent the now deleted message
+                    emitter = req.app.get('socketio');
+                    const bathroomId = parseInt(bathroom.id);
+
+                    nearby.forEach(function(user) {
+                      const userData = user.dataValues;
+                    //  emitter.emit(userData.id, actions.messageReceivedRankUpdated(bathroomId)); //tells affected userss to go get their new ranks
+                    });
+
+                    res.send([bathroomId, toLineMember.rank+1, parseInt(message.id)]); //the user who accepted the message will update own client state on success
+                  });
+
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
 //get user's messages
 router.get('/messages/:userid', function(req, res) {
   const userId = req.params.userid;

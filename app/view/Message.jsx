@@ -1,5 +1,10 @@
 import React, {PropTypes, Component} from 'react';
+import { connect } from 'react-redux';
+import $ from 'jquery';
 import Paper from 'material-ui/Paper';
+import {
+  acceptCut,
+} from '../actions.js';
 
 
 const { object, arrayOf } = PropTypes;
@@ -7,7 +12,12 @@ const propTypes = {
   message: object.isRequired,
 };
 
-export default class Message extends Component {
+class Message extends Component {
+  constructor() {
+    super();
+    this.acceptMessage = this.acceptMessage.bind(this);
+  }
+
   getFormattedMessage(m) {
     return `user ${m.fromId} would like to cut you in line for $${m.money}.`;
   }
@@ -23,6 +33,28 @@ export default class Message extends Component {
       };
   }
 
+  acceptMessage(event) {
+    event.stopPropagation();
+    const {
+      message,
+      acceptCut,
+    } = this.props;
+
+    const url = 'routes/messages/accept';
+    $.ajax({
+      url,
+      type: "POST",
+      dataType: "json",
+      data: message,
+      success: data => {
+        acceptCut(...data);
+      },
+      error: err => {
+        console.log('error', err);
+      }
+    });
+  }
+
 	render() {
     const {
       message,
@@ -30,6 +62,7 @@ export default class Message extends Component {
 
     return (
       <Paper
+        onClick={ this.acceptMessage }
         style={ this.getContainerStyle() }
         zDepth={2}>
         { this.getFormattedMessage(message) }
@@ -40,3 +73,15 @@ export default class Message extends Component {
 }
 
 Message.propTypes = propTypes;
+
+const mapDispatchToProps = dispatch => {
+  return {
+    acceptCut: (bathroomId, newRank, messageId) => dispatch(acceptCut(bathroomId, newRank, messageId)),
+  };
+}
+
+export default connect(
+  undefined,
+  mapDispatchToProps
+)(Message)
+

@@ -4,6 +4,7 @@ export const ADD_TO_LINE = "addToLine";
 
 export const ADD_MSG = "addMessage";
 export const REMOVE_MSG = "removeMessage";
+export const ACCEPT_CUT_MSG = "exportCutMessage";
 
 export const SET_BATHROOM_OCCUPIED = "setBathroomOccupied";
 export const SET_BATHROOM_UNOCCUPIED = "setBathroomUnoccupied";
@@ -114,6 +115,17 @@ export function addMessage(message) {
   return {
     type: ADD_MSG,
     data: message,
+  };
+}
+
+export function acceptCut(bathroomId, newRank, messageId) {
+  return {
+    type: ACCEPT_CUT_MSG,
+    data: {
+      bathroomId,
+      newRank,
+      messageId
+    }
   };
 }
 

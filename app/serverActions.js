@@ -2,6 +2,14 @@ const MSG_LEFT_LINE = "messageLeftLine";
 const MSG_ENTER_LINE = "messageEnterLine";
 const MSG_UPDATE_LINE_LINE_MEMBER = "messageLinememberUpdateLine";
 const MSG_RECEIVED_CUT_MESSAGE = "messageReceivedCutMessage";
+const MSG_RANK_UPDATED = "messageRankUpdated";
+
+function messageReceivedRankUpdated(bathroomId) {
+  return {
+    type: MSG_RANK_UPDATED,
+    data: bathroomId,
+  };
+}
 
 function messageReceivedCutMessage(cutMessage) {
   return {
@@ -39,8 +47,10 @@ module.exports = {
   messageReceivedEnterLine: messageReceivedEnterLine,
   messageReceivedUpdateLineLineMember: messageReceivedUpdateLineLineMember,
   messageReceivedCutMessage: messageReceivedCutMessage,
+  messageReceivedRankUpdated: messageReceivedRankUpdated,
   MSG_LEFT_LINE: MSG_LEFT_LINE,
   MSG_ENTER_LINE: MSG_ENTER_LINE,
   MSG_UPDATE_LINE_LINE_MEMBER: MSG_UPDATE_LINE_LINE_MEMBER,
   MSG_RECEIVED_CUT_MESSAGE: MSG_RECEIVED_CUT_MESSAGE,
+  MSG_RANK_UPDATED: MSG_RANK_UPDATED,
 };

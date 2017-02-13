@@ -140,7 +140,7 @@ class Map extends Component {
       bulkUpdatePrimitives,
     } = this.props;
 
-    const userId = this.getUserIdFromURL(); //TODO this is just a hack
+    const userId = this.getUserIdFromURL();
     const url = `routes/messages/${userId}`;
 
     $.ajax({
@@ -149,7 +149,7 @@ class Map extends Component {
         navigator.geolocation.getCurrentPosition(locationData => {
           let userLocation = this.props.userLocation;
 
-          if (false) { //locationData && locationData.coords) { //TODO this is also just a hack
+          if (false) { //locationData && locationData.coords) {
             const {
               longitude,
               latitude,

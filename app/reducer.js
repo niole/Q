@@ -14,6 +14,7 @@ import {
   HIDE_BATHROOM_TOOLTIP,
   ADD_TIME_IN_BATHROOM,
   BULK_UPDATE_PRIMITIVES,
+  ACCEPT_CUT_MSG,
 } from './actions.js';
 
 import {
@@ -34,6 +35,12 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case ACCEPT_CUT_MSG:
+      return Object.assign({}, state, {
+        messages: state.messages.filter(m => m.id !== action.data.messageId),
+        lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),
+      });
+
     case MSG_RECEIVED_CUT_MESSAGE:
       if (action.data.toId === state.userId) {
         return Object.assign({}, state, {
