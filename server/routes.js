@@ -112,10 +112,11 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
             id: bathroomId
           }
       }).then(function() {
+          const newRank = nextLineLength-1;
 
           LineMember.create({
             bathroomId: bathroom.id,
-            rank: nextLineLength,
+            rank: newRank,
             userId: userId
           }).then(function() {
               User.findAll({
@@ -130,7 +131,7 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
 
                 res.send({
                   bathroomId: bathroom.id,
-                  rank: nextLineLength,
+                  rank: newRank,
                 });
 
               });

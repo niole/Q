@@ -1,4 +1,5 @@
 import React, {PropTypes, Component} from 'react';
+import FlatButton from 'material-ui/FlatButton';
 import LineMember from './LineMember.jsx';
 
 
@@ -22,17 +23,17 @@ export default class Line extends Component {
     if (!lineLength) {
       return "there is no line";
     }
+    const viewableLineLength = lineLength-1;
+    const width = (100/viewableLineLength)+"%";
 
-    const width = (100/lineLength)+"%";
-
-    const line = new Array(lineLength);
-    let i=0;
-    for (; i < lineLength; i++) {
+    const line = new Array(viewableLineLength);
+    let i=1;
+    for (; i < viewableLineLength+1; i++) {
       line[i] = (
         <LineMember
           key={ `linemember-${i}` }
           userId={ userId }
-          rankLineMember={ i+1 }
+          rankLineMember={ i }
           userRank={ userRank }
           width={ width }
           bathroomId={ bathroomId }
@@ -43,10 +44,27 @@ export default class Line extends Component {
 		return line;
   }
 
+  getLineHeader() {
+    const {
+      lineLength,
+    } = this.props;
+    let label = "Occupied";
+
+    if (lineLength === 0) {
+      label = "Vacant";
+    }
+
+    const className = lineLength ? "full-hourglass" : "empty-hourglass";
+    return (
+      <div title={ label } className={ `hourglass ${className}` }/>
+    );
+  }
+
 	render() {
 		return (
       <div>
-        line: <div className="line">{ this.getLineMembers() }</div>
+        <div className="toilet-header">{ this.getLineHeader() }</div>
+        <div className="line">{ this.getLineMembers() }</div>
       </div>
     );
 	}

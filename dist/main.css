@@ -6,6 +6,28 @@ body {
   height: 85vh;
 }
 
+.hourglass {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+}
+
+.full-hourglass {
+  background-image: url('./full_hourglass.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.empty-hourglass {
+  background-image: url('./empty_hourglass.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.toilet-header {
+  display: inline-block;
+}
+
 .line {
   width: 210px;
   height: 30px;
