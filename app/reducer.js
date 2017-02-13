@@ -22,6 +22,7 @@ import {
   MSG_ENTER_LINE,
   MSG_UPDATE_LINE_LINE_MEMBER,
   MSG_RECEIVED_CUT_MESSAGE,
+  MSG_RANK_UPDATED,
 } from './serverActions.js';
 
 
@@ -35,6 +36,11 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case MSG_RANK_UPDATED:
+      return Object.assign({}, state, {
+        lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),
+      });
+
     case ACCEPT_CUT_MSG:
       return Object.assign({}, state, {
         messages: state.messages.filter(m => m.id !== action.data.messageId),

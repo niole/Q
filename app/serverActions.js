@@ -7,7 +7,10 @@ const MSG_RANK_UPDATED = "messageRankUpdated";
 function messageReceivedRankUpdated(bathroomId) {
   return {
     type: MSG_RANK_UPDATED,
-    data: bathroomId,
+    data: {
+      bathroomId: bathroomId,
+      newRank: null
+    }
   };
 }
 

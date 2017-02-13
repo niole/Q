@@ -21,6 +21,7 @@ import {
   MSG_LEFT_LINE,
   MSG_ENTER_LINE,
   MSG_RECEIVED_CUT_MESSAGE,
+  MSG_RANK_UPDATED,
 } from '../serverActions.js';
 
 
@@ -88,10 +89,31 @@ class Map extends Component {
           return this.handleServerActionDispatch(msg);
         case MSG_RECEIVED_CUT_MESSAGE:
           return this.handleServerActionDispatch(msg);
+        case MSG_RANK_UPDATED:
+          return this.handleMessageReceivedRankUpdated(msg);
         default:
           break;
       }
 
+    });
+  }
+
+  handleMessageReceivedRankUpdated(msg) {
+    const {
+      userId,
+      socketMessageDispatcher,
+    } = this.props;
+
+    const url = `routes/linemember/${msg.data.bathroomId}/${userId}`;
+    $.ajax({
+      url,
+      success: lineMember => {
+        msg.data.newRank = lineMember.rank;
+        socketMessageDispatcher(msg);
+      },
+      error: err => {
+        console.log('error', err);
+      }
     });
   }
 

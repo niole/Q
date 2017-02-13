@@ -121,10 +121,10 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
               User.findAll({
                 where: queryHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, userId)
               }).then(function(nearby) {
+                emitter = req.app.get('socketio');
 
                 nearby.forEach(function(user) {
                   const userData = user.dataValues;
-                  emitter = req.app.get('socketio');
                   emitter.emit(userData.id, actions.messageReceivedEnterLine(parseInt(bathroomId), nextLineLength));
                 });
 
@@ -206,10 +206,10 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
               User.findAll({
                 where: queryHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude, userId)
               }).then(function(nearby) {
+                emitter = req.app.get('socketio');
 
                 nearby.forEach(function(user) {
                   const userData = user.dataValues;
-                  emitter = req.app.get('socketio');
                   emitter.emit(userData.id, actions.messageReceivedLeftLine(bathroomData.id, bathroomData.lineLength));
                 });
 
@@ -245,6 +245,8 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
         toId: lmData.userId,
         money: money
       }).then(function(ms) {
+        emitter = req.app.get('socketio');
+
         const message = shouldBeInt.reduce(function(m, key) {
           if (typeof m[key] === "string") {
             m[key] = parseInt(m[key]);
@@ -252,7 +254,6 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
           return m;
         },  ms.dataValues);
 
-        emitter = req.app.get('socketio');
         emitter.emit(message.toId, actions.messageReceivedCutMessage(message));
 
         res.send(message);
@@ -342,7 +343,8 @@ router.post('/messages/accept', function(req, res) {
 
                     nearby.forEach(function(user) {
                       const userData = user.dataValues;
-                    //  emitter.emit(userData.id, actions.messageReceivedRankUpdated(bathroomId)); //tells affected userss to go get their new ranks
+
+                      emitter.emit(userData.id, actions.messageReceivedRankUpdated(bathroomId)); //tells affected userss to go get their new ranks
                     });
 
                     res.send([bathroomId, toLineMember.rank+1, parseInt(message.id)]); //the user who accepted the message will update own client state on success
