@@ -41,7 +41,7 @@ export default function appReducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_TIME_IN_BATHROOM:
       return Object.assign({}, state, {
-        timeInBathroom: state.timeInBathroom > 0 ? state.timeInBathroom-1 : 0,
+        timeInBathroom: state.timeInBathroom > 0 ? state.timeInBathroom + action.data : 0,
       });
 
     case ENTER_BATHROOM:

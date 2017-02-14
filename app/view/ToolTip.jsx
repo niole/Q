@@ -50,6 +50,7 @@ class ToolTip extends MUIBaseTheme {
     this.leaveLine = this.leaveLine.bind(this);
     this.enterBathroom = this.enterBathroom.bind(this);
     this.handleRequestClose = this.handleRequestClose.bind(this);
+    this.addTime = this.addTime.bind(this);
   }
 
   /**
@@ -63,7 +64,7 @@ class ToolTip extends MUIBaseTheme {
       timeInBathroom,
     } = this.props;
 
-    const addTimeBtn = this.getAddTimeButton(userRank === 0 && !!occupyingBathroom); //can only add time if in bathroom
+    const addTimeBtn = this.getAddTimeButton(!!!occupyingBathroom); //can only add time if in bathroom
     const enterLeaveBtns = this.getEnterLeaveButton(userRank, occupyingBathroom, timeInBathroom);
     return [addTimeBtn, enterLeaveBtns];
   }
@@ -162,7 +163,7 @@ class ToolTip extends MUIBaseTheme {
         if (!this.timer) {
           //start timer
           label = '20 Enter Bathroom';
-          this.timer = new Timer(this.leaveLine, /*20000*/ 3000, this.props.updateTimeInBathroom);
+          this.timer = new Timer(this.leaveLine, 20000, this.props.updateTimeInBathroom);
           this.timer.runIntervalTimer();
         } else {
           label = `${timeInBathroom} Enter Bathroom`;
@@ -191,15 +192,19 @@ class ToolTip extends MUIBaseTheme {
    */
   getAddTimeButton(disabled) {
     return (
-      <FlatButton key="add-time" label="Add Time" onClick={ this.addTime } disabled={ disabled }/>
+      <FlatButton key="add-time" label="Add Time" onClick={ this.addTime } disabled={ !!disabled }/>
     );
   }
 
   /**
      handler for adding time when user is in bathroom
+     always adds 1 min
    */
-  addTime(ms) {
+  addTime() {
+    const ms = 60000;
+    const s = 60;
     this.timer.addAdditionalTime(ms);
+    this.props.updateTimeInBathroom(s);
   }
 
   getLineHeader() {
@@ -306,7 +311,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     enterLine: (bId, time) => dispatch(enterLine(bId, time)),
     leaveLine: (bId, time) => dispatch(leaveLine(bId, time)),
     enterBathroom: (bId, time) => dispatch(enterBathroom(bId, time)),
-    updateTimeInBathroom: () => dispatch(updateTimeInBathroom())
+    updateTimeInBathroom: (time) => dispatch(updateTimeInBathroom(time))
   };
 }
 
