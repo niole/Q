@@ -214,7 +214,10 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
                   emitter.emit(userData.id, actions.messageReceivedLeftLine(bathroomData.id, bathroomData.lineLength));
                 });
 
-                res.send(bathroomId);
+                res.send({
+                  bathroomId: bathroomId,
+                  lineLength: bathroomData.lineLength,
+                });
               });
 
           });

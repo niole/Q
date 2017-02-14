@@ -1,5 +1,4 @@
 import React, {PropTypes, Component} from 'react';
-import FlatButton from 'material-ui/FlatButton';
 import LineMember from './LineMember.jsx';
 
 
@@ -44,28 +43,9 @@ export default class Line extends Component {
 		return line;
   }
 
-  getLineHeader() {
-    const {
-      lineLength,
-    } = this.props;
-    let label = "Occupied";
-
-    if (lineLength === 0) {
-      label = "Vacant";
-    }
-
-    const className = lineLength ? "full-hourglass" : "empty-hourglass";
-    return (
-      <div title={ label } className={ `hourglass ${className}` }/>
-    );
-  }
-
 	render() {
 		return (
-      <div>
-        <div className="toilet-header">{ this.getLineHeader() }</div>
-        <div className="line">{ this.getLineMembers() }</div>
-      </div>
+      <div className="line">{ this.getLineMembers() }</div>
     );
 	}
 }

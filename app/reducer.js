@@ -12,9 +12,10 @@ import {
   SET_BATHROOM_UNOCCUPIED,
   SHOW_BATHROOM_TOOLTIP,
   HIDE_BATHROOM_TOOLTIP,
-  ADD_TIME_IN_BATHROOM,
   BULK_UPDATE_PRIMITIVES,
   ACCEPT_CUT_MSG,
+  ENTER_BATHROOM,
+  UPDATE_TIME_IN_BATHROOM,
 } from './actions.js';
 
 import {
@@ -32,10 +33,23 @@ const initialState = {
   lines: {},
   messages: [],
   nearbyBathrooms: [],
+  occupyingBathroom: false,
+  timeInBathroom: 0,
 };
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case UPDATE_TIME_IN_BATHROOM:
+      return Object.assign({}, state, {
+        timeInBathroom: state.timeInBathroom > 0 ? state.timeInBathroom-1 : 0,
+      });
+
+    case ENTER_BATHROOM:
+      return Object.assign({}, state, {
+        occupyingBathroom: action.data.bathroomId,
+        timeInBathroom: action.data.time,
+      });
+
     case MSG_RANK_UPDATED:
       return Object.assign({}, state, {
         lines: Object.assign({}, state.lines, { [action.data.bathroomId]: action.data.newRank }),
@@ -169,7 +183,7 @@ export default function appReducer(state = initialState, action) {
 
     case REMOVE_FROM_LINE:
       const newLines = Object.assign({}, state.lines);
-      const bId = parseInt(action.data);
+      const bId = parseInt(action.data.bathroomId);
 
       delete newLines[bId];
 
@@ -177,15 +191,18 @@ export default function appReducer(state = initialState, action) {
         lines: newLines,
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
           if (bId === b.id) {
-            b.lineLength -= 1;
+            b.lineLength = action.data.lineLength;
           }
           return b;
-        })
+        }),
+        occupyingBathroom: false,
+        timeInBathroom: 0,
       });
 
     case ADD_TO_LINE:
       return Object.assign({}, state, {
-        lines: Object.assign(state.lines, action.data),
+        timeInBathroom: action.data.time,
+        lines: Object.assign(state.lines, action.data.lineData),
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
           if (typeof action.data[b.id] === "number") {
             b.lineLength += 1;

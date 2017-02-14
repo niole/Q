@@ -12,7 +12,8 @@ export const ADD_BATHROOMS = "addBathrooms";
 export const REMOVE_BATHROOMS = "removeBathrooms";
 export const SHOW_BATHROOM_TOOLTIP = "showBathroomTooltip";
 export const HIDE_BATHROOM_TOOLTIP = "hideBathroomTooltip";
-export const ADD_TIME_IN_BATHROOM = "addTimeInBathroom";
+export const ENTER_BATHROOM = "enterBathroom";
+export const UPDATE_TIME_IN_BATHROOM = "updateTimeInBathroom";
 
 export const UPDATE_USER_LOCATION = "updateUserLocation";
 export const UPDATE_USER_ID = "updateUserId";
@@ -24,13 +25,6 @@ export function bulkUpdatePrimitives(stateObj) {
   return {
     type: BULK_UPDATE_PRIMITIVES,
     data: stateObj,
-  };
-}
-
-export function addTimeInBathroom(bathroomId) {
-  return {
-    type: ADD_TIME_IN_BATHROOM,
-    data: bathroomId,
   };
 }
 
@@ -97,17 +91,39 @@ export function updateLineRank(newRank, bathroomId) {
   };
 }
 
-export function enterLine(lineMemberData) {
+export function enterBathroom(bathroomId, time) {
   return {
-    type: ADD_TO_LINE,
-    data: lineMemberData,
+    type: ENTER_BATHROOM,
+    data: {
+      bathroomId,
+      time,
+    }
   };
 }
 
-export function leaveLine(bathroomId) {
+export function updateTimeInBathroom() {
+  return {
+    type: UPDATE_TIME_IN_BATHROOM,
+  };
+}
+
+export function enterLine(lineData, time) {
+  return {
+    type: ADD_TO_LINE,
+    data: {
+      lineData,
+      time,
+    }
+  };
+}
+
+export function leaveLine(bathroomId, lineLength) {
   return {
     type: REMOVE_FROM_LINE,
-    data: bathroomId,
+    data: {
+      bathroomId,
+      lineLength,
+    }
   };
 }
 

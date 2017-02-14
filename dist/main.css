@@ -6,6 +6,9 @@ body {
   height: 85vh;
 }
 
+.timer-btn {
+}
+
 .hourglass {
   width: 25px;
   height: 25px;
@@ -30,7 +33,7 @@ body {
 
 .line {
   width: 210px;
-  height: 30px;
+  height: 25px;
   display: inline-block;
 }
 

@@ -1,0 +1,33 @@
+{
+  "bathrooms": [{
+    "occupied": true,
+    "latitude": 51.5073,
+    "longitude": -0.1222,
+    "lineLength": 2
+  }],
+  "lineMembers": [{
+    "bathroomId": 1,
+    "rank": 0,
+    "userId": 1
+  }, {
+    "bathroomId": 1,
+    "rank": 1,
+    "userId": 2
+  }],
+  "users": [{
+    "username": "u1",
+    "money": 100.0,
+    "latitude": 51.508742,
+    "longitude": -0.120850
+  }, {
+    "username": "u2",
+    "money": 100.0,
+    "latitude": 51.508742,
+    "longitude": -0.120850
+  }, {
+    "username": "niole",
+    "money": 100.0,
+    "latitude": 51.508742,
+    "longitude": -0.120850
+  }]
+}

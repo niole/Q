@@ -1,3 +1,4 @@
+const fixtures = require('./ModelFixtures.json');
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize('mysql', 'root', 'root', {
@@ -27,20 +28,15 @@ const LineMember = sequelize.define(
   }
 );
 
-LineMember.sync({force: true}).then(function() {
-  return LineMember.create({
-    bathroomId: 1,
-    rank: 0,
-    userId: 1
-  }).then(function() {
-    LineMember.create({
-      bathroomId: 1,
-      rank: 1,
-      userId: 2
+LineMember.sync({force: true});/*.then(function() {
+  return fixtures.lineMembers.map(function(lm) {
+    return LineMember.create({
+      bathroomId: lm.bathroomId,
+      rank: lm.rank,
+      userId: lm.userId
     });
   });
-
-});
+});*/
 
 const Message = sequelize.define(
   'message',
@@ -95,24 +91,12 @@ const User = sequelize.define(
 );
 
 User.sync({force: true}).then(function () {
-  return User.create({
-    username: "u1",
-    money: 100.0,
-    latitude: 51.508742,
-    longitude: -0.120850,
-  }).then(function() {
-    User.create({
-      username: "u2",
-      money: 100.0,
-      latitude: 51.508742,
-      longitude: -0.120850,
-    }).then(function() {
-      User.create({
-        username: "niole",
-        money: 100.0,
-        latitude: 51.508742,
-        longitude: -0.120850,
-      });
+  return fixtures.users.map(function(u) {
+    return User.create({
+        username: u.username,
+        money: u.money,
+        latitude: u.latitude,
+        longitude: u.longitude,
     });
   });
 });
@@ -143,11 +127,13 @@ const Bathroom = sequelize.define(
 );
 
 Bathroom.sync({force: true}).then(function () {
-  return Bathroom.create({
-    occupied: true,
-    latitude: 51.5073,
-    longitude: -0.1222,
-    lineLength: 2,
+  return fixtures.bathrooms.map(function(b) {
+    return Bathroom.create({
+      occupied: b.occupied,
+      latitude: b.latitude,
+      longitude: b.longitude,
+      lineLength: 0 //b.lineLength,
+    });
   });
 });
 

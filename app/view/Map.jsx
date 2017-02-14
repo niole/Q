@@ -79,8 +79,6 @@ class Map extends Component {
     return socket.on(id, msg => {
       //based on what the message is, dispatch an action
       //msg must be an actionType: { type: TYPE, data: ... }
-      //TODO if client is looking at bathroom and is in line, must do another request
-      //to get relevant data for tooltip
 
       switch(msg.type) {
         case MSG_LEFT_LINE:
@@ -162,7 +160,7 @@ class Map extends Component {
       bulkUpdatePrimitives,
     } = this.props;
 
-    const userId = this.getUserIdFromURL();
+    const userId = this.getUserIdFromURL(); //TODO this is a hack and must change
     const url = `routes/messages/${userId}`;
 
     $.ajax({
@@ -171,7 +169,7 @@ class Map extends Component {
         navigator.geolocation.getCurrentPosition(locationData => {
           let userLocation = this.props.userLocation;
 
-          if (false) { //locationData && locationData.coords) {
+          if (false) { //locationData && locationData.coords) {//TODO this is a hack and must change
             const {
               longitude,
               latitude,
@@ -375,6 +373,7 @@ const mapStateToProps = (state) => {
     nearbyBathrooms,
     lines,
     messages,
+    timeRemaining,
   } = state;
 
   return {
@@ -383,6 +382,7 @@ const mapStateToProps = (state) => {
       userLocation,
       nearbyBathrooms,
       messages,
+      timeRemaining,
   };
 }
 
