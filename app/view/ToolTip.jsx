@@ -258,8 +258,12 @@ class ToolTip extends MUIBaseTheme {
     const {
       closeTooltip,
       bathroomId,
+      timeInBathroom,
     } = this.props;
-    closeTooltip(bathroomId);
+
+    if (timeInBathroom === 0) {
+      closeTooltip(bathroomId);
+    }
   }
 
 	render() {
