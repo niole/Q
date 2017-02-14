@@ -108,7 +108,7 @@ export function updateTimeInBathroom(time) {
   };
 }
 
-export function enterLine(lineData, time) {
+export function enterLine(lineData, time = 0) {
   return {
     type: ADD_TO_LINE,
     data: {

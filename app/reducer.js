@@ -77,7 +77,8 @@ export default function appReducer(state = initialState, action) {
             b.lineLength = action.data.lineLength;
           }
           return b;
-        })
+        }),
+        timeInBathroom: action.data.newRank === 0 ? 20 : 0,
       });
 
     case MSG_ENTER_LINE:
@@ -204,7 +205,7 @@ export default function appReducer(state = initialState, action) {
         timeInBathroom: action.data.time,
         lines: Object.assign(state.lines, action.data.lineData),
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
-          if (typeof action.data[b.id] === "number") {
+          if (typeof action.data.lineData[b.id] === "number") {
             b.lineLength += 1;
           }
           return b;
