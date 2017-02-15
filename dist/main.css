@@ -41,6 +41,12 @@ body {
   display: inline-block;
 }
 
+.no-line-placeholder {
+  top: -8px;
+  position: absolute;
+  left: 45px;
+}
+
 .line {
   width: 275px;
   height: 25px;

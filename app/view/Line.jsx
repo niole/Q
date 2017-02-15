@@ -20,7 +20,7 @@ export default class Line extends Component {
     } = this.props;
 
     if (!lineLength) {
-      return "there is no line";
+      return <div className="no-line-placeholder">there is no line</div>;
     }
     const viewableLineLength = lineLength-1;
     const width = (100/viewableLineLength)+"%";

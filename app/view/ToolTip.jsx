@@ -245,16 +245,14 @@ class ToolTip extends MUIBaseTheme {
       userRank,
     } = this.props;
 
-    if (userRank > 0) {
-      return (
-          <Line
-            bathroomId={ bathroomId }
-            lineLength={ lineLength }
-            userRank={ userRank }
-            userId={ userId }
-          />
-      );
-    }
+    return (
+        <Line
+          bathroomId={ bathroomId }
+          lineLength={ lineLength }
+          userRank={ userRank }
+          userId={ userId }
+        />
+    );
   }
 
   handleRequestClose() {

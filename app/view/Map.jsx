@@ -73,6 +73,9 @@ class Map extends Component {
     });
   }
 
+  /**
+    delegates actions from server to respective handler
+   */
   setUpMessageHandler(id) {
     const socket = io.connect();
 
