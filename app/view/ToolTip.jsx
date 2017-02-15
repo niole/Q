@@ -7,7 +7,7 @@ import MenuItem from 'material-ui/MenuItem';
 import MUIBaseTheme from './MUIBaseTheme.jsx';
 import FlatButton from 'material-ui/FlatButton';
 import Line from './Line.jsx';
-import Timer from '../Timer.js';
+import timer from '../globalTimer.js';
 import {
   enterLine,
   leaveLine,
@@ -50,7 +50,6 @@ class ToolTip extends MUIBaseTheme {
       updateTimeInBathroom,
     } = props;
 
-    this.timer = new Timer();
     this.enterLine = this.enterLine.bind(this);
     this.leaveLine = this.leaveLine.bind(this);
     this.enterBathroom = this.enterBathroom.bind(this);
@@ -127,8 +126,8 @@ class ToolTip extends MUIBaseTheme {
         console.log('success');
         leaveLine(data.bathroomId, data.lineLength);
 
-        if (this.timer.isActive()) {
-          this.timer.stopTimer();
+        if (timer.isActive()) {
+          timer.stopTimer();
         }
       },
       error: e => {
@@ -143,7 +142,7 @@ class ToolTip extends MUIBaseTheme {
       bathroomId,
     } = this.props;
 
-    this.timer.stopTimer();
+    timer.stopTimer();
 
     enterBathroom(bathroomId, 180);
   }
@@ -165,26 +164,25 @@ class ToolTip extends MUIBaseTheme {
       if (!inBathroom) {
         handler = this.enterBathroom;
 
-        if (!this.timer.isActive()) {
+        if (!timer.isActive()) {
           //start timer
           label = '20 Enter Bathroom';
-          this.updateTimeInBathroom(20);
-          this.timer.setIntervalObserver(this.updateTimeInBathroom);
-          this.timer.setObserver(this.leaveLine);
-          this.timer.setMS(20000);
-          this.timer.runIntervalTimer();
+          timer.setIntervalObserver(this.updateTimeInBathroom);
+          timer.setObserver(this.leaveLine);
+          timer.setMS(20000);
+          timer.runIntervalTimer();
         } else {
           label = `${timeInBathroom} Enter Bathroom`;
         }
 
-      } else if (!this.timer.isActive()) {
+      } else if (!timer.isActive()) {
         //in bathroom, but no timer
         handler = this.leaveLine;
         label = "180 Leave Bathroom";
-        this.timer.setIntervalObserver(this.updateTimeInBathroom);
-        this.timer.setObserver(this.leaveLine);
-        this.timer.setMS(180000);
-        this.timer.runIntervalTimer();
+        timer.setIntervalObserver(this.updateTimeInBathroom);
+        timer.setObserver(this.leaveLine);
+        timer.setMS(180000);
+        timer.runIntervalTimer();
       } else {
         //timer's running, but in bathroom
         handler = this.leaveLine;
@@ -216,7 +214,7 @@ class ToolTip extends MUIBaseTheme {
   addTime() {
     const ms = 60000;
     const s = 60;
-    this.timer.addAdditionalTime(ms);
+    timer.addAdditionalTime(ms);
     this.updateTimeInBathroom(s);
   }
 
@@ -269,13 +267,9 @@ class ToolTip extends MUIBaseTheme {
     const {
       closeTooltip,
       bathroomId,
-      timeInBathroom,
     } = this.props;
 
-    if (timeInBathroom === 0) {
-      this.timer.stopTimer();
-      closeTooltip(bathroomId);
-    }
+    closeTooltip(bathroomId);
   }
 
 	render() {

@@ -34,7 +34,6 @@ const initialState = {
   messages: [],
   nearbyBathrooms: [],
   occupyingBathroom: false,
-  timeInBathroom: 0,
   timers: {},
 };
 
@@ -83,7 +82,9 @@ export default function appReducer(state = initialState, action) {
           }
           return b;
         }),
-        timeInBathroom: action.data.newRank === 0 ? 20 : 0,
+        timers: Object.assign(state.timers, {
+          [action.data.bathroomId]: action.data.newRank === 0 ? 20 : 0,
+        }),
       });
 
     case MSG_ENTER_LINE:
@@ -202,19 +203,23 @@ export default function appReducer(state = initialState, action) {
           return b;
         }),
         occupyingBathroom: false,
-        timeInBathroom: 0,
+        timers: Object.assign(state.timers, {
+          [action.data.bathroomId]: 0,
+        }),
       });
 
     case ADD_TO_LINE:
       return Object.assign({}, state, {
-        timeInBathroom: action.data.time,
         lines: Object.assign(state.lines, action.data.lineData),
         nearbyBathrooms: state.nearbyBathrooms.map(b => {
           if (typeof action.data.lineData[b.id] === "number") {
             b.lineLength += 1;
           }
           return b;
-        })
+        }),
+        timers: Object.assign(state.timers, {
+          [action.data.bathroomId]: action.data.time,
+        }),
       });
 
     case ADD_MSG:

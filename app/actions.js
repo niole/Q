@@ -112,9 +112,12 @@ export function updateTimeInBathroom(bathroomId, time = -1) {
 }
 
 export function enterLine(lineData, time = 0) {
+  const bathroomId = Object.keys(lineData)[0];
+
   return {
     type: ADD_TO_LINE,
     data: {
+      bathroomId,
       lineData,
       time,
     }
