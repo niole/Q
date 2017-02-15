@@ -13,7 +13,19 @@ export default class Timer {
     this.intervalTimer = null;
     this.observer = observer;
     this.intervalObserver = intervalObserver || (() => {});
-    this.timePassed = 0;
+    this._isActive = false;
+  }
+
+  setIsActive() {
+    this._isActive = true;
+  }
+
+  resetIsActive() {
+    this._isActive = false;
+  }
+
+  isActive() {
+    return this._isActive;
   }
 
   runIntervalTimer() {
@@ -22,10 +34,13 @@ export default class Timer {
     }
 
     this.intervalTimer = setTimeout(() => {
-      this.timePassed += 1;
       this.intervalObserver();
       this.runIntervalTimer();
     }, 1000);
+  }
+
+  setIntervalObserver(observer) {
+    this.intervalObserver = observer;
   }
 
   setObserver(observer) {
@@ -43,16 +58,13 @@ export default class Timer {
   resetTimer() {
     this.timer = null;
     this.intervalTimer = null;
-    this.clearTimePassed();
     this.resetAdditionalTime();
-  }
-
-  clearTimePassed() {
-    this.timePassed = 0;
   }
 
   runTimer() {
     clearTimeout(this.timer); //precaution
+    this.setIsActive();
+
     this.timer = setTimeout(() => {
       const additionalTime = this.getAdditionalTime();
       if (additionalTime) {
@@ -71,6 +83,7 @@ export default class Timer {
   stopTimer(shouldExecuteObserver = false) {
     clearTimeout(this.timer);
     clearTimeout(this.intervalTimer);
+    this.resetIsActive();
     if (shouldExecuteObserver) {
       this.observer();
     }

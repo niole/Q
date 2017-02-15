@@ -35,19 +35,24 @@ const initialState = {
   nearbyBathrooms: [],
   occupyingBathroom: false,
   timeInBathroom: 0,
+  timers: {},
 };
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_TIME_IN_BATHROOM:
       return Object.assign({}, state, {
-        timeInBathroom: state.timeInBathroom > 0 ? state.timeInBathroom + action.data : 0,
+        timers: Object.assign(state.timers, {
+          [action.data.bathroomId]: (state.timers[action.data.bathroomId] || 0) + action.data.time,
+        }),
       });
 
     case ENTER_BATHROOM:
       return Object.assign({}, state, {
         occupyingBathroom: action.data.bathroomId,
-        timeInBathroom: action.data.time,
+        timers: Object.assign(state.timers, {
+          [action.data.bathroomId]: action.data.time,
+        }),
       });
 
     case MSG_RANK_UPDATED:

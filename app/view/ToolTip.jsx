@@ -43,14 +43,20 @@ const defaultProps = {
   to cut them in line
  */
 class ToolTip extends MUIBaseTheme {
-  constructor() {
-    super();
-    this.timer = null;
+  constructor(props) {
+    super(props);
+    const {
+      bathroomId,
+      updateTimeInBathroom,
+    } = props;
+
+    this.timer = new Timer();
     this.enterLine = this.enterLine.bind(this);
     this.leaveLine = this.leaveLine.bind(this);
     this.enterBathroom = this.enterBathroom.bind(this);
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.addTime = this.addTime.bind(this);
+    this.updateTimeInBathroom = updateTimeInBathroom.bind(this, bathroomId);
   }
 
   /**
@@ -121,9 +127,8 @@ class ToolTip extends MUIBaseTheme {
         console.log('success');
         leaveLine(data.bathroomId, data.lineLength);
 
-        if (this.timer) {
+        if (this.timer.isActive()) {
           this.timer.stopTimer();
-          this.timer = null;
         }
       },
       error: e => {
@@ -139,7 +144,7 @@ class ToolTip extends MUIBaseTheme {
     } = this.props;
 
     this.timer.stopTimer();
-    this.timer = null;
+
     enterBathroom(bathroomId, 180);
   }
 
@@ -160,20 +165,25 @@ class ToolTip extends MUIBaseTheme {
       if (!inBathroom) {
         handler = this.enterBathroom;
 
-        if (!this.timer) {
+        if (!this.timer.isActive()) {
           //start timer
           label = '20 Enter Bathroom';
-          this.timer = new Timer(this.leaveLine, 20000, this.props.updateTimeInBathroom);
+          this.updateTimeInBathroom(20);
+          this.timer.setIntervalObserver(this.updateTimeInBathroom);
+          this.timer.setObserver(this.leaveLine);
+          this.timer.setMS(20000);
           this.timer.runIntervalTimer();
         } else {
           label = `${timeInBathroom} Enter Bathroom`;
         }
 
-      } else if (!this.timer) {
+      } else if (!this.timer.isActive()) {
         //in bathroom, but no timer
         handler = this.leaveLine;
         label = "180 Leave Bathroom";
-        this.timer = new Timer(this.leaveLine, 180000, this.props.updateTimeInBathroom);
+        this.timer.setIntervalObserver(this.updateTimeInBathroom);
+        this.timer.setObserver(this.leaveLine);
+        this.timer.setMS(180000);
         this.timer.runIntervalTimer();
       } else {
         //timer's running, but in bathroom
@@ -207,7 +217,7 @@ class ToolTip extends MUIBaseTheme {
     const ms = 60000;
     const s = 60;
     this.timer.addAdditionalTime(ms);
-    this.props.updateTimeInBathroom(s);
+    this.updateTimeInBathroom(s);
   }
 
   getLineHeader() {
@@ -263,6 +273,7 @@ class ToolTip extends MUIBaseTheme {
     } = this.props;
 
     if (timeInBathroom === 0) {
+      this.timer.stopTimer();
       closeTooltip(bathroomId);
     }
   }
@@ -307,7 +318,7 @@ const mapStateToProps = (state, ownProps) => {
     occupyingBathroom: state.occupyingBathroom,
     userRank: state.lines[ownProps.bathroomId],
     lineLength: bathroom ? bathroom.lineLength : 0,
-    timeInBathroom: state.timeInBathroom,
+    timeInBathroom: state.timers[ownProps.bathroomId] || 0,
   };
 }
 
@@ -316,7 +327,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     enterLine: (bId, time) => dispatch(enterLine(bId, time)),
     leaveLine: (bId, time) => dispatch(leaveLine(bId, time)),
     enterBathroom: (bId, time) => dispatch(enterBathroom(bId, time)),
-    updateTimeInBathroom: (time) => dispatch(updateTimeInBathroom(time))
+    updateTimeInBathroom: (bId, time) => dispatch(updateTimeInBathroom(bId, time))
   };
 }
 

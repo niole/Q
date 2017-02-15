@@ -101,10 +101,13 @@ export function enterBathroom(bathroomId, time) {
   };
 }
 
-export function updateTimeInBathroom(time) {
+export function updateTimeInBathroom(bathroomId, time = -1) {
   return {
     type: UPDATE_TIME_IN_BATHROOM,
-    data: time || -1
+    data: {
+      time,
+      bathroomId,
+    }
   };
 }
 
