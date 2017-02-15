@@ -18,16 +18,28 @@ export default class MessagesBar extends MUIBaseTheme {
 	render() {
    return (
       <Paper
-        style={{ height: "100px" }}
+        style={{
+          height: "120px",
+          width: "100%",
+          position: "fixed",
+          bottom: "0px",
+        }}
         zDepth={1}>
         <BottomNavigation selectedIndex={0}>
           <BottomNavigationItem
             label="Messages"
             icon={ <div className="message-icon"/> }
             onTouchTap={() => this.select(0)}
-            style={{ left: 0 }}
+            style={{
+              height: 100,
+              position: "absolute",
+              left: 15,
+              top: 10,
+            }}
           />
-          { this.props.messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
+          <div className="message-res">
+            { this.props.messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
+          </div>
         </BottomNavigation>
       </Paper>
     );
