@@ -3,19 +3,39 @@ import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigati
 import Paper from 'material-ui/Paper';
 import MUIBaseTheme from './MUIBaseTheme.jsx';
 import Message from './Message.jsx';
+import Timeout from './Timeout.jsx';
 
 
 const { object, arrayOf } = PropTypes;
 const propTypes = {
   messages: arrayOf(object),
+  timers: object,
 };
 
 const defaultProps = {
   messages: [],
+  timers: {},
 };
 
 export default class MessagesBar extends MUIBaseTheme {
+  renderTimers(timers) {
+    let renderable = [];
+    let bId;
+    for (bId in timers) {
+      if (timers[bId] > 0) {
+        renderable.push(<Timeout bathroomId={ bId }/>);
+      }
+    }
+
+    return renderable;
+  }
+
 	render() {
+   const {
+     timers,
+     messages,
+   } = this.props;
+
    return (
       <Paper
         style={{
@@ -25,7 +45,10 @@ export default class MessagesBar extends MUIBaseTheme {
           bottom: "0px",
         }}
         zDepth={1}>
-        <BottomNavigation selectedIndex={0}>
+        <BottomNavigation selectedIndex={1}>
+          <div className="timers toolbar-box">
+            { this.renderTimers(timers) }
+          </div>
           <BottomNavigationItem
             label="Messages"
             icon={ <div className="message-icon"/> }
@@ -33,12 +56,11 @@ export default class MessagesBar extends MUIBaseTheme {
             style={{
               height: 100,
               position: "absolute",
-              left: 15,
               top: 10,
             }}
           />
-          <div className="message-res">
-            { this.props.messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
+          <div className="messages toolbar-box">
+            { messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
           </div>
         </BottomNavigation>
       </Paper>

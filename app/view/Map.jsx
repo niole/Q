@@ -355,13 +355,14 @@ class Map extends Component {
     const {
       nearbyBathrooms,
       messages,
+      timers,
     } = this.props;
 
 		return (
       <div>
         <div id="map" ref="map"/>
         { this.showOpenToolTips(nearbyBathrooms) }
-        <MessagesBar messages={ messages }/>
+        <MessagesBar timers={ timers } messages={ messages }/>
       </div>
 		);
 	}
@@ -377,6 +378,7 @@ const mapStateToProps = (state) => {
     lines,
     messages,
     timeRemaining,
+    timers,
   } = state;
 
   return {
@@ -386,6 +388,7 @@ const mapStateToProps = (state) => {
       nearbyBathrooms,
       messages,
       timeRemaining,
+      timers,
   };
 }
 
