@@ -269,7 +269,7 @@ class Map extends Component {
           });
 
           const infoWindow = new google.maps.InfoWindow({
-            content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` }/>)
+            content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` } className="gmaps-infowindow"/>),
           });
 
           const boundListener = this.handleBathroomClick.bind(this, b);

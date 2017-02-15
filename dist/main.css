@@ -6,7 +6,18 @@ body {
   height: 85vh;
 }
 
-.timer-btn {
+.gmaps-infowindow {
+  width: 313px;
+  height: 160px;
+}
+
+.gm-style-iw {
+  width: 313px;
+  height: 160px;
+}
+
+.gm-style-iw ~ div {
+  display: none;
 }
 
 .hourglass {

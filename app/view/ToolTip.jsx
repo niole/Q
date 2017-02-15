@@ -149,10 +149,10 @@ class ToolTip extends MUIBaseTheme {
   getEnterLeaveButton(userRank, inBathroom, timeInBathroom) {
     //enter bathroom is handled somewhere else
     let handler = this.leaveLine;
-    let label = "Leave Line";
+    let label = "Click to Leave Line";
 
     if (userRank <= 0) {
-      label = "Enter Line";
+      label = "Click to Enter Line";
       handler = this.enterLine;
     }
 
@@ -182,8 +182,11 @@ class ToolTip extends MUIBaseTheme {
       }
     }
 
+    const labelStyle = { textTransform: "none" };
+    const style = label !== "Enter Line" ? { marginRight: 20 } : {};
+
     return (
-      <FlatButton key={ `${label}-btn` } onClick={ handler } label={ label }/>
+      <FlatButton labelStyle={ labelStyle } style={ style } key={ `${label}-btn` } onClick={ handler } label={ label }/>
     );
   }
 
@@ -192,7 +195,7 @@ class ToolTip extends MUIBaseTheme {
    */
   getAddTimeButton(disabled) {
     return (
-      <FlatButton key="add-time" label="Add Time" onClick={ this.addTime } disabled={ !!disabled }/>
+      <FlatButton labelStyle={{ textTransform: "none" }} key="add-time" label="Add Time" onClick={ this.addTime } disabled={ !!disabled }/>
     );
   }
 
@@ -278,8 +281,8 @@ class ToolTip extends MUIBaseTheme {
       <Popover
         open={shouldOpen}
         anchorEl={target}
-        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-        targetOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        anchorOrigin={{horizontal: 'left', vertical: 'top'}}
+        targetOrigin={{horizontal: 'left', vertical: 'top'}}
         onRequestClose={this.handleRequestClose}
       >
         <Menu>

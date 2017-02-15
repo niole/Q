@@ -34,14 +34,21 @@ function messageReceivedEnterLine(bathroomId, lineLength) {
 function messageReceivedUpdateLineLineMember(bathroomId, newRank, lineLength) {
   return {
     type: MSG_UPDATE_LINE_LINE_MEMBER,
-    data: { newRank, bathroomId, lineLength },
+    data: {
+      newRank,
+      bathroomId,
+      lineLength
+    },
   };
 }
 
 function messageReceivedLeftLine(bathroomId, lineLength) {
   return {
     type: MSG_LEFT_LINE,
-    data: { bathroomId, lineLength },
+    data: {
+      bathroomId,
+      lineLength
+    },
   };
 }
 
