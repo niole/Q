@@ -1,9 +1,11 @@
 {
   "bathrooms": [{
-    "occupied": true,
     "latitude": 51.5073,
     "longitude": -0.1222,
-    "lineLength": 2
+    "lineLength": 0,
+    "ownerId": 1,
+    "address": "",
+    "name": "the broom"
   }],
   "lineMembers": [{
     "bathroomId": 1,

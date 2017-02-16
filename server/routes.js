@@ -73,8 +73,10 @@ router.get('/linemember/:bathroomId/:userid', function(req, res) {
         bathroomId: bathroomId,
       }
     }).then(function(lineMember) {
-      const data = lineMember.dataValues;
-      res.send(data);
+      const data = lineMember && lineMember.dataValues;
+      if (data) {
+        res.send(data);
+      }
     });
 });
 
@@ -379,7 +381,6 @@ router.get('/messages/:userid', function(req, res) {
 });
 
 router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {
-
   const userId = req.params.userId;
   const lat = req.params.lat;
   const lng = req.params.lng;
@@ -402,5 +403,38 @@ router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {
     });
   });
 });
+
+router.post('/bathrooms/add', function(req, res) {
+  const address = req.body.address;
+  const name = req.body.name;
+  const ownerId = req.body.ownerId;
+  const lat = req.body.lat;
+  const lng = req.body.lng;
+
+  Bathroom.find({
+    where: {
+      address: address,
+      ownerId: ownerId,
+      latitude: lat,
+      longitude: lng,
+    }
+  }).then(function(foundBathroom) {
+    if (!foundBathroom || !foundBathroom.dataValues) {
+      Bathroom.create({
+        address: address,
+        name: name,
+        ownerId: ownerId,
+        latitude: lat,
+        longitude: lng,
+        lineLength: 0,
+      }).then(function(data) {
+        res.send(data);
+      });
+    } else {
+      res.send(foundBathroom);
+    }
+  });
+});
+
 
 module.exports = router;

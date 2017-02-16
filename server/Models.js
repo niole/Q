@@ -109,10 +109,6 @@ User.sync({force: true});/*.then(function () {
 const Bathroom = sequelize.define(
   'bathroom',
   {
-    occupied: {
-      type: Sequelize.BOOLEAN,
-      field: 'occupied'
-    },
     latitude: {
       type: Sequelize.FLOAT,
       field: 'lat'
@@ -124,7 +120,19 @@ const Bathroom = sequelize.define(
     lineLength: {
       type: Sequelize.INTEGER,
       field: 'line_length'
-    }
+    },
+    ownerId: {
+      type: Sequelize.INTEGER,
+      field: 'owner_id'
+    },
+    name: {
+      type: Sequelize.STRING,
+      field: 'name'
+    },
+    address: {
+      type: Sequelize.STRING,
+      field: 'address'
+    },
   },
   {
   freezeTableName: true
@@ -134,10 +142,12 @@ const Bathroom = sequelize.define(
 Bathroom.sync({force: true}).then(function () {
   return fixtures.bathrooms.map(function(b) {
     return Bathroom.create({
-      occupied: b.occupied,
       latitude: b.latitude,
       longitude: b.longitude,
-      lineLength: 0 //b.lineLength,
+      lineLength: b.lineLength,
+      ownerId: b.ownerId,
+      name: b.name,
+      address: b.address,
     });
   });
 });

@@ -16,6 +16,7 @@ import {
   ACCEPT_CUT_MSG,
   ENTER_BATHROOM,
   UPDATE_TIME_IN_BATHROOM,
+  TOGGLE_BATHROOM_MAKER,
 } from './actions.js';
 
 import {
@@ -35,10 +36,19 @@ const initialState = {
   nearbyBathrooms: [],
   occupyingBathroom: false,
   timers: {},
+  addingBathroom: false,
+  inProgressBathroomAddress: null,
 };
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case TOGGLE_BATHROOM_MAKER:
+      return Object.assign({}, state, {
+        addingBathroom: action.data.makeBathroom,
+        inProgressBathroomAddress: action.data.address,
+        inProgressBathroomLatLng: action.data.latLng,
+      });
+
     case UPDATE_TIME_IN_BATHROOM:
       return Object.assign({}, state, {
         timers: Object.assign(state.timers, {

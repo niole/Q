@@ -14,11 +14,23 @@ export const SHOW_BATHROOM_TOOLTIP = "showBathroomTooltip";
 export const HIDE_BATHROOM_TOOLTIP = "hideBathroomTooltip";
 export const ENTER_BATHROOM = "enterBathroom";
 export const UPDATE_TIME_IN_BATHROOM = "updateTimeInBathroom";
+export const TOGGLE_BATHROOM_MAKER = "toggleBathroomMaker";
 
 export const UPDATE_USER_LOCATION = "updateUserLocation";
 export const UPDATE_USER_ID = "updateUserId";
 
 export const BULK_UPDATE_PRIMITIVES = "bulkUpdatePrimitivesOnly";
+
+export function toggleBathroomMaker(makeBathroom = false, address = null, latLng = null) {
+  return {
+    type: TOGGLE_BATHROOM_MAKER,
+    data: {
+      makeBathroom,
+      address,
+      latLng,
+    },
+  };
+}
 
 
 export function bulkUpdatePrimitives(stateObj) {

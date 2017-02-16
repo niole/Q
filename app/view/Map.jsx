@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
 import MessagesBar from './MessagesBar.jsx';
+import CreateBathroomDialog from './CreateBathroomDialog.jsx';
 import {
   updateUserLocation,
   addBathrooms,
@@ -14,6 +15,7 @@ import {
   hideBathroomTooltip,
   showBathroomTooltip,
   bulkUpdatePrimitives,
+  toggleBathroomMaker,
 } from '../actions.js';
 
 import {
@@ -58,13 +60,40 @@ class Map extends Component {
     }
   }
 
+  initGeoCoder() {
+    return new google.maps.Geocoder();
+  }
+
   componentDidMount() {
    const {
       userLocation,
+      toggleBathroomMaker,
     } = this.props;
+
 
     this.messageHandler = this.setUpMessageHandler();
     this.map = this.initMap(this.refs.map);
+    const geocoder = this.initGeoCoder();
+
+    this.map.addListener('click', event => {
+      const {
+        latLng,
+        pixel,
+      } = event;
+
+      function getAddress(formattedAddress, latLng) {
+        toggleBathroomMaker(true, formattedAddress, latLng);
+        //this.map.setCenter(marker.getPosition());
+      }
+
+      geocoder.geocode({ 'latLng': event.latLng }, (results, status) => {
+        if (status == google.maps.GeocoderStatus.OK) {
+          const latLng = [event.latLng.lat(), event.latLng.lng()];
+          const address =results[1].formatted_address ? results[1].formatted_address : latLng;
+          getAddress(address, latLng);
+        }
+      });
+    });
 
     const userId = this.getUserIdFromURL(); //TODO this is a hack and must change
 
@@ -354,16 +383,24 @@ class Map extends Component {
     hideBathroomTooltip(bathroomId);
   }
 
+  showAddBathroomDialog() {
+    return (
+      <CreateBathroomDialog/>
+    );
+  }
+
 	render() {
     const {
       nearbyBathrooms,
       messages,
       timers,
+      addingBathroom,
     } = this.props;
 
 		return (
       <div>
         <div id="map" ref="map"/>
+        { addingBathroom && this.showAddBathroomDialog() }
         { this.showOpenToolTips(nearbyBathrooms) }
         <MessagesBar timers={ timers } messages={ messages }/>
       </div>
@@ -380,18 +417,22 @@ const mapStateToProps = (state) => {
     nearbyBathrooms,
     lines,
     messages,
-    timeRemaining,
     timers,
+    inProgressBathroomAddress,
+    inProgressBathroomLatLng,
+    addingBathroom,
   } = state;
 
   return {
-      lines,
-      userId,
-      userLocation,
-      nearbyBathrooms,
-      messages,
-      timeRemaining,
-      timers,
+    lines,
+    userId,
+    userLocation,
+    nearbyBathrooms,
+    messages,
+    timers,
+    inProgressBathroomAddress,
+    inProgressBathroomLatLng,
+    addingBathroom,
   };
 }
 
@@ -409,6 +450,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     showBathroomTooltip: bId => dispatch(showBathroomTooltip(bId)),
     bulkUpdatePrimitives: stateObj => dispatch(bulkUpdatePrimitives(stateObj)),
     socketMessageDispatcher: message => dispatch(message),
+    toggleBathroomMaker: (shouldOpen, address, latLng) => dispatch(toggleBathroomMaker(shouldOpen, address, latLng)),
   };
 }
 
