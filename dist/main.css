@@ -6,17 +6,21 @@ body {
 }
 
 #login-link {
-  border: 1px solid;
-  padding: 5px;
-  border-radius: 3px;
   width: 245px;
   display: block;
   margin: auto;
 }
 
-#login-link:hover {
+a {
+  border: 1px solid;
+  padding: 5px;
+  border-radius: 3px;
+  color: deepskyblue;
+}
+
+a:hover {
   color: lightblue;
-  background: cornflowerblue;
+  background: midnightblue;
 }
 
 a:link {
@@ -29,6 +33,20 @@ a:visited {
 
 a:active {
     text-decoration: none;
+}
+
+#logout-link:hover {
+  background: midnightblue;
+}
+
+#logout-link {
+  top: 10px;
+  position: absolute;
+  z-index: 2;
+  left: 10px;
+  background: white;
+  font-size: .9em;
+  font-weight: bold;
 }
 
 #login-container {

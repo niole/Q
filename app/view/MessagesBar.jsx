@@ -45,6 +45,7 @@ export default class MessagesBar extends MUIBaseTheme {
           bottom: "0px",
         }}
         zDepth={1}>
+        <a id="logout-link" href="/logout">logout</a>
         <BottomNavigation selectedIndex={1}>
           <div className="timers toolbar-box">
             { this.renderTimers(timers) }

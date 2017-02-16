@@ -78,7 +78,7 @@ s.server.listen(3000, function() {
 
 s.app.get('/logout', function(req, res){
   req.logout();
-  res.redirect('/');
+  res.redirect('/login');
 });
 
 s.app.get('/auth/facebook',
