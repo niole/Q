@@ -99,18 +99,13 @@ s.app.get('/auth/facebook/callback',
 );
 
 s.app.get('/login', function(req, res) {
-  res.send('authentication failed');
+  res.sendFile(path.join(__dirname, 'dist/login.html'));
 });
 
 s.app.get('/socket.io', function response(req, res) {
   res.sendFile(path.join(__dirname, 'node_modules/socket.io-client/dist/socket.io.js'));
 });
 
-s.app.get('/', function response(req, res) {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
-});
-
 s.app.get('^/[0-9]+$', function response(req, res) {
-  //TODO remove this hack when we get login
   res.sendFile(path.join(__dirname, 'dist/index.html'));
 });

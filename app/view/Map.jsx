@@ -222,11 +222,7 @@ class Map extends Component {
       lng: newLocation[1],
     };
 
-    console.log('newPosiitionn', newPosition);
-
     const url = `routes/user/${userId}/loc/update`;
-
-    console.log('url', url);
 
     $.ajax({
       url,

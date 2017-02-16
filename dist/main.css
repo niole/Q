@@ -1,5 +1,7 @@
 body {
   margin: 0;
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+  color: rgba(0, 0, 0, 0.952941);
 }
 
 #map {

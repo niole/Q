@@ -20,9 +20,6 @@ let emitter;
 
 //update user location
 router.post('/user/:userId/loc/update', function(req, res) {
-    console.log('req.body', req.body);
-    console.log('req.params', req.params);
-
     const latitude = req.body.lat;
     const longitude = req.body.lng;
 
