@@ -66,10 +66,14 @@ class Map extends Component {
     this.messageHandler = this.setUpMessageHandler();
     this.map = this.initMap(this.refs.map);
 
-    this.updateUserLocation(null, userLocation);
+    const userId = this.getUserIdFromURL(); //TODO this is a hack and must change
 
-    this.setInitialState(() => {
-      this.getNearbyBathrooms();
+    this.updateUserLocation(null, userLocation, userId);
+
+    this.setInitialState(
+      userId,
+      () => {
+        this.getNearbyBathrooms();
     });
   }
 
@@ -158,12 +162,11 @@ class Map extends Component {
     }
   }
 
-  setInitialState(callback) {
+  setInitialState(userId, callback) {
     const {
       bulkUpdatePrimitives,
     } = this.props;
 
-    const userId = this.getUserIdFromURL(); //TODO this is a hack and must change
     const url = `routes/messages/${userId}`;
 
     $.ajax({
@@ -204,7 +207,7 @@ class Map extends Component {
     return userId;
   }
 
-  updateUserLocation(oldLocation, newLocation) {
+  updateUserLocation(oldLocation, newLocation, userId) {
     const {
       updateUserLocation,
     } = this.props;
@@ -219,7 +222,11 @@ class Map extends Component {
       lng: newLocation[1],
     };
 
-    const url = 'routes/user/:userId/loc/update';
+    console.log('newPosiitionn', newPosition);
+
+    const url = `routes/user/${userId}/loc/update`;
+
+    console.log('url', url);
 
     $.ajax({
       url,

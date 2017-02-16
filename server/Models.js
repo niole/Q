@@ -83,6 +83,10 @@ const User = sequelize.define(
     longitude: {
       type: Sequelize.FLOAT,
       field: 'lng'
+    },
+    authId: {
+      type: Sequelize.STRING,
+      field: 'authId'
     }
   },
   {
@@ -90,16 +94,17 @@ const User = sequelize.define(
   }
 );
 
-User.sync({force: true}).then(function () {
+User.sync({force: true});/*.then(function () {
   return fixtures.users.map(function(u) {
     return User.create({
+        authId: "0",
         username: u.username,
         money: u.money,
         latitude: u.latitude,
         longitude: u.longitude,
     });
   });
-});
+});*/
 
 const Bathroom = sequelize.define(
   'bathroom',
