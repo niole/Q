@@ -2,10 +2,91 @@ body {
   margin: 0;
   font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
   color: rgba(0, 0, 0, 0.952941);
+  height: 100%;
+}
+
+#login-link {
+  border: 1px solid;
+  padding: 5px;
+  border-radius: 3px;
+  width: 245px;
+  display: block;
+  margin: auto;
+}
+
+#login-link:hover {
+  color: lightblue;
+  background: cornflowerblue;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+#login-container {
+  padding: 15%;
+  width: 310px;
+  margin: auto;
+  border-radius: 3px;
+}
+
+#q-container {
+  width: 307px;
+  margin: auto;
+  padding-top: 65px;
+}
+
+.dot {
+  background: red;
+  border-radius: 10px;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+  display: inline-block;
+  position: relative;
+  -webkit-animation: mymove 5s infinite; /* Safari 4.0 - 8.0 */
+  animation: mymove 5s infinite;
+}
+
+#one {
+  -webkit-animation: one 3s infinite;
+  animation: one 3s infinite;
+}
+
+#two {
+  -webkit-animation: two 2s infinite;
+  animation: two 2s infinite;
+  -webkit-animation-delay: 1s; /* Safari 4.0 - 8.0 */
+  animation-delay: 1s;
+  background: lightblue;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes one {
+    from {left: 50px;}
+    to {left: 300px;}
+}
+
+@keyframes two {
+    from {left: 0px;}
+    to {left: 250px;}
 }
 
 #map {
   height: 100vh;
+}
+
+#login-header {
+  width: 307px;
+  font-size: 3em;
 }
 
 .messages {

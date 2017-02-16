@@ -7,10 +7,26 @@
     <title>Q</title>
   </head>
   <body>
-    Welcome to Q
-    <a href="/auth/facebook">
-      click to authenticate with facebook
-    </a>
+    <div id="login-container">
+      <h1 id="login-header">Welcome to Q</h1>
+      <a id="login-link" href="/auth/facebook">
+        click to authenticate with facebook
+      </a>
+
+      <div id="q-container"/>
+    </div>
+
+    <script>
+      var totalDots = 2;
+      var i=1;
+      var dot;
+      for (; i < totalDots+1; i++) {
+        dot = document.createElement('div');
+        dot.className = "dot";
+        dot.id = i === 2 ? "two" : "one";
+        document.getElementById("q-container").appendChild(dot);
+      }
+    </script>
   </body>
 </html>
 
