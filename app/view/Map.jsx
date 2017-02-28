@@ -179,9 +179,10 @@ class Map extends MUIBaseTheme {
     });
   }
 
+  /**
+   * dispatches actions issued by the server via a socket
+   **/
   handleServerActionDispatch(msg) {
-    //someone entered a line that you are near
-    //this doesn't handle if you entered a line
     const {
       socketMessageDispatcher,
     } = this.props;
@@ -189,6 +190,9 @@ class Map extends MUIBaseTheme {
     socketMessageDispatcher(msg);
   }
 
+  /**
+   * updates client state when server returns with nearby bathroom data
+   **/
   newNearbyBathroomsHandler(nearbyBathrooms) {
     return nearbyBathrooms.map(b => {
       const marker = new google.maps.Marker({
@@ -223,6 +227,11 @@ class Map extends MUIBaseTheme {
     });
   }
 
+  /**
+   * when other user leaves a line near the current user
+   * this handles the push notification
+   * and updates client line data
+   **/
   handleLineLeave(msg) {
     const {
       socketMessageDispatcher,
@@ -253,6 +262,9 @@ class Map extends MUIBaseTheme {
     }
   }
 
+  /**
+   * handles updating client state with browser location
+   **/
   getBrowserLocation(callback) {
     navigator.geolocation.getCurrentPosition(locationData => {
       let userLocation = this.props.userLocation;
@@ -270,6 +282,9 @@ class Map extends MUIBaseTheme {
     });
   }
 
+  /**
+   * handles batch updates necessary when this component mounts
+   **/
   setInitialState(userId, callback) {
     const {
       bulkUpdatePrimitives,
@@ -281,16 +296,7 @@ class Map extends MUIBaseTheme {
       url,
       success: messages => {
         this.getBrowserLocation(userLocation => {
-
-          if (userLocation[0] !== this.props.userLocation[0] &&
-            userLocation[1] !== this.props.userLocation[1]) {
-            this.updateUserLocation(userLocation, userId, newLocation => {
-              bulkUpdatePrimitives({ userId, newLocation, messages });
-            });
-           } else {
-              bulkUpdatePrimitives({ userId, userLocation, messages });
-           }
-
+          bulkUpdatePrimitives({ userId, userLocation, messages });
           callback();
         });
       },
@@ -300,6 +306,9 @@ class Map extends MUIBaseTheme {
     });
   }
 
+  /**
+   * returns user Id which is appended at end of url
+   **/
   getUserIdFromURL() {
     const url = window.location.href;
     let userId = url.match(endNumberPattern);
@@ -314,10 +323,6 @@ class Map extends MUIBaseTheme {
   }
 
   updateUserLocation(newLocation, userId, callback) {
-    const {
-      updateUserLocation,
-    } = this.props;
-
     const newPosition = {
       lat: newLocation[0],
       lng: newLocation[1],
@@ -341,8 +346,6 @@ class Map extends MUIBaseTheme {
            map: this.map,
            icon: '../user_loc_icon.png'
          });
-
-        updateUserLocation(newLocation, getLatLngRange(newLocation[0], newLocation[1]));
 
         if (callback) {
           callback(newLocation);
@@ -446,6 +449,9 @@ class Map extends MUIBaseTheme {
       if (userLocation[0] !== this.props.userLocation[0] &&
         userLocation[1] !== this.props.userLocation[1]) {
         updateUserLocation(userLocation, getLatLngRange(userLocation[0], userLocation[1]));
+      } else {
+        //pan to old location, just in case moved map
+        this.map.panTo(new google.maps.LatLng(...userLocation));
       }
 
     });
