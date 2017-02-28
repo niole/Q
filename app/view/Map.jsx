@@ -2,6 +2,8 @@ import React, {PropTypes, Component} from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { connect } from 'react-redux';
 import $ from 'jquery';
+import FlatButton from 'material-ui/FlatButton';
+import MUIBaseTheme from './MUIBaseTheme.jsx';
 import ToolTip from './ToolTip.jsx';
 import MessagesBar from './MessagesBar.jsx';
 import CreateBathroomDialog from './CreateBathroomDialog.jsx';
@@ -39,7 +41,7 @@ const propTypes = {
   lines: object,
 };
 
-class Map extends Component {
+class Map extends MUIBaseTheme {
   constructor() {
     super();
     this.userMarker = null;
@@ -47,6 +49,7 @@ class Map extends Component {
     this.messageHandler = null;
 
     this.closeTooltip = this.closeTooltip.bind(this);
+    this.handleUpdateLocationButtonClick = this.handleUpdateLocationButtonClick.bind(this);
   }
 
   componentWillReceiveProps(newProps) {
@@ -250,6 +253,23 @@ class Map extends Component {
     }
   }
 
+  getBrowserLocation(callback) {
+    navigator.geolocation.getCurrentPosition(locationData => {
+      let userLocation = this.props.userLocation;
+
+      if (locationData && locationData.coords) {
+        const {
+          longitude,
+          latitude,
+        } = locationData.coords;
+
+        userLocation = [latitude, longitude];
+      }
+
+      callback(userLocation);
+    });
+  }
+
   setInitialState(userId, callback) {
     const {
       bulkUpdatePrimitives,
@@ -260,17 +280,7 @@ class Map extends Component {
     $.ajax({
       url,
       success: messages => {
-        navigator.geolocation.getCurrentPosition(locationData => {
-          let userLocation = this.props.userLocation;
-
-          if (locationData && locationData.coords) {
-            const {
-              longitude,
-              latitude,
-            } = locationData.coords;
-
-            userLocation = [latitude, longitude];
-          }
+        this.getBrowserLocation(userLocation => {
 
           if (userLocation[0] !== this.props.userLocation[0] &&
             userLocation[1] !== this.props.userLocation[1]) {
@@ -333,7 +343,10 @@ class Map extends Component {
          });
 
         updateUserLocation(newLocation, getLatLngRange(newLocation[0], newLocation[1]));
-        callback(newLocation);
+
+        if (callback) {
+          callback(newLocation);
+        }
       }
     });
 
@@ -422,17 +435,43 @@ class Map extends Component {
     );
   }
 
+  handleUpdateLocationButtonClick() {
+    const {
+      userId,
+      updateUserLocation,
+    } = this.props;
+
+    this.getBrowserLocation(userLocation => {
+
+      if (userLocation[0] !== this.props.userLocation[0] &&
+        userLocation[1] !== this.props.userLocation[1]) {
+        updateUserLocation(userLocation, getLatLngRange(userLocation[0], userLocation[1]));
+      }
+
+    });
+
+  }
+
 	render() {
     const {
       nearbyBathrooms,
       messages,
       timers,
       addingBathroom,
+      userId,
+      updateUserLocation,
     } = this.props;
 
 		return (
       <div>
         <div id="map" ref="map"/>
+        <div id="update-pos">
+          <FlatButton
+            label="Update Your Location"
+            primary={true}
+            onTouchTap={ this.handleUpdateLocationButtonClick }
+          />
+        </div>
         { addingBathroom && this.showAddBathroomDialog() }
         { this.showOpenToolTips(nearbyBathrooms) }
         <MessagesBar timers={ timers } messages={ messages }/>
