@@ -24,6 +24,7 @@ import {
   MSG_ENTER_LINE,
   MSG_RECEIVED_CUT_MESSAGE,
   MSG_RANK_UPDATED,
+  MSG_BATHROOM_CREATED,
 } from '../serverActions.js';
 
 
@@ -75,23 +76,36 @@ class Map extends Component {
     this.map = this.initMap(this.refs.map);
     const geocoder = this.initGeoCoder();
 
-    this.map.addListener('click', event => {
-      const {
-        latLng,
-        pixel,
-      } = event;
+    this.map.addListener('mousedown', event => {
+      var shouldShow = false;
 
-      function getAddress(formattedAddress, latLng) {
-        toggleBathroomMaker(true, formattedAddress, latLng);
-        //this.map.setCenter(marker.getPosition());
-      }
+      var timer = setTimeout(() => {
+        shouldShow = true;
+      }, 1000);
 
-      geocoder.geocode({ 'latLng': event.latLng }, (results, status) => {
-        if (status == google.maps.GeocoderStatus.OK) {
-          const latLng = [event.latLng.lat(), event.latLng.lng()];
-          const address =results[1].formatted_address ? results[1].formatted_address : latLng;
-          getAddress(address, latLng);
+      this.map.addListener('mouseup', event => {
+        if (shouldShow) {
+          const {
+            latLng,
+            pixel,
+          } = event;
+
+          function getAddress(formattedAddress, latLng) {
+            toggleBathroomMaker(true, formattedAddress, latLng);
+          }
+
+          geocoder.geocode({ 'latLng': event.latLng }, (results, status) => {
+            if (status == google.maps.GeocoderStatus.OK) {
+              const latLng = [event.latLng.lat(), event.latLng.lng()];
+              const address =results[1].formatted_address ? results[1].formatted_address : latLng;
+              getAddress(address, latLng);
+            }
+          });
         }
+
+        clearTimeout(timer);
+        timer = null;
+        shouldShow = false;
       });
     });
 
@@ -125,11 +139,18 @@ class Map extends Component {
           return this.handleServerActionDispatch(msg);
         case MSG_RANK_UPDATED:
           return this.handleMessageReceivedRankUpdated(msg);
+        case MSG_BATHROOM_CREATED:
+          return this.handleMessageReceivedNewNearbyBathrooms(msg);
         default:
           break;
       }
 
     });
+  }
+
+  handleMessageReceivedNewNearbyBathrooms(msg) {
+    msg.data = this.newNearbyBathroomsHandler(msg.data);
+    this.handleServerActionDispatch(msg);
   }
 
   handleMessageReceivedRankUpdated(msg) {
@@ -159,6 +180,40 @@ class Map extends Component {
     } = this.props;
 
     socketMessageDispatcher(msg);
+  }
+
+  newNearbyBathroomsHandler(nearbyBathrooms) {
+    return nearbyBathrooms.map(b => {
+      const marker = new google.maps.Marker({
+        position: { lat: b.latitude, lng: b.longitude },
+        map: this.map,
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` } className="gmaps-infowindow"/>),
+      });
+
+      const boundListener = this.handleBathroomClick.bind(this, b);
+
+      google.maps.event.addListener(marker, 'click', () => {
+        infoWindow.open(this.map, marker);
+        boundListener(b);
+      });
+
+      return {
+        marker,
+        infoWindow,
+        unmountHandler: () => {
+          //TODO this won't work
+          google.maps.event.removeEventListener(marker, 'click', boundListener);
+        },
+        lat: b.latitude,
+        lng: b.longitude,
+        showTooltip: false,
+        lineLength: b.lineLength,
+        id: b.id,
+      };
+    });
   }
 
   handleLineLeave(msg) {
@@ -296,38 +351,38 @@ class Map extends Component {
           nearbyBathrooms,
           lineMembers,
         } = bathroomData;
+        const newNearByBathrooms = this.newNearbyBathroomsHandler(nearbyBathrooms);
+        //const newNearByBathrooms = nearbyBathrooms.map(b => {
+        //  const marker = new google.maps.Marker({
+        //    position: { lat: b.latitude, lng: b.longitude },
+        //    map: this.map
+        //  });
 
-        const newNearByBathrooms = nearbyBathrooms.map(b => {
-          const marker = new google.maps.Marker({
-            position: { lat: b.latitude, lng: b.longitude },
-            map: this.map
-          });
+        //  const infoWindow = new google.maps.InfoWindow({
+        //    content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` } className="gmaps-infowindow"/>),
+        //  });
 
-          const infoWindow = new google.maps.InfoWindow({
-            content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` } className="gmaps-infowindow"/>),
-          });
+        //  const boundListener = this.handleBathroomClick.bind(this, b);
 
-          const boundListener = this.handleBathroomClick.bind(this, b);
+        //  google.maps.event.addListener(marker, 'click', () => {
+        //    infoWindow.open(this.map, marker);
+        //    boundListener(b);
+        //  });
 
-          google.maps.event.addListener(marker, 'click', () => {
-            infoWindow.open(this.map, marker);
-            boundListener(b);
-          });
-
-          return {
-            marker,
-            infoWindow,
-            unmountHandler: () => {
-              //TODO this won't work
-              google.maps.event.removeEventListener(marker, 'click', boundListener);
-            },
-            lat: b.latitude,
-            lng: b.longitude,
-            showTooltip: false,
-            lineLength: b.lineLength,
-            id: b.id,
-          };
-        });
+        //  return {
+        //    marker,
+        //    infoWindow,
+        //    unmountHandler: () => {
+        //      //TODO this won't work
+        //      google.maps.event.removeEventListener(marker, 'click', boundListener);
+        //    },
+        //    lat: b.latitude,
+        //    lng: b.longitude,
+        //    showTooltip: false,
+        //    lineLength: b.lineLength,
+        //    id: b.id,
+        //  };
+        //});
 
         addBathrooms({ newNearByBathrooms, lineMembers });
       },

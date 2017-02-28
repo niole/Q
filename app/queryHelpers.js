@@ -12,25 +12,29 @@ function getNeabyUsersWhereClause(centralLat, centralLng, userToExclude) {
   const south = geolib.computeDestinationPoint(bLocation, 2000, 180);
   const west = geolib.computeDestinationPoint(bLocation, 2000, 270);
 
+  const lngs = [west.longitude, east.longitude].sort(function(a, b) { return a-b; });
+  const lats = [south.latitude, north.latitude].sort(function(a, b) { return a-b; });
+
   if (userToExclude) {
     return {
       longitude: {
-        $between: [west.longitude, east.longitude]
+        $between: lngs,
       },
       latitude: {
-        $between: [south.latitude, north.latitude]
+        $between: lats,
       },
       id: {
         $ne: userToExclude
       }
     };
   }
+
   return {
    longitude: {
-     $between: [west.longitude, east.longitude]
+     $between: lngs,
    },
    latitude: {
-     $between: [south.latitude, north.latitude]
+     $between: lats,
    }
   };
 }

@@ -62,7 +62,10 @@ class CreateBathroomDialog extends MUIBaseTheme {
       <FlatButton
         label="Cancel"
         primary={true}
-        onTouchTap={this.closeNewBathroomDialog}
+        onTouchTap={event => {
+          event.preventDefault();
+          this.closeNewBathroomDialog();
+        }}
       />,
       <FlatButton
         label="Submit"

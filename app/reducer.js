@@ -25,6 +25,7 @@ import {
   MSG_UPDATE_LINE_LINE_MEMBER,
   MSG_RECEIVED_CUT_MESSAGE,
   MSG_RANK_UPDATED,
+  MSG_BATHROOM_CREATED,
 } from './serverActions.js';
 
 
@@ -42,6 +43,11 @@ const initialState = {
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case MSG_BATHROOM_CREATED:
+      return Object.assign({}, state, {
+        nearbyBathrooms: state.nearbyBathrooms.concat(action.data),
+      });
+
     case TOGGLE_BATHROOM_MAKER:
       return Object.assign({}, state, {
         addingBathroom: action.data.makeBathroom,

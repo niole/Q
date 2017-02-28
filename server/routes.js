@@ -407,9 +407,9 @@ router.get('/bathrooms/near/:lat/:lng/:userId', function(req, res) {
 router.post('/bathrooms/add', function(req, res) {
   const address = req.body.address;
   const name = req.body.name;
-  const ownerId = req.body.ownerId;
-  const lat = req.body.lat;
-  const lng = req.body.lng;
+  const ownerId = parseInt(req.body.ownerId);
+  const lat = parseFloat(req.body.lat);
+  const lng = parseFloat(req.body.lng);
 
   Bathroom.find({
     where: {
@@ -419,16 +419,32 @@ router.post('/bathrooms/add', function(req, res) {
       longitude: lng,
     }
   }).then(function(foundBathroom) {
+    emitter = req.app.get('socketio');
+
     if (!foundBathroom || !foundBathroom.dataValues) {
-      Bathroom.create({
+      const newBathroom = {
         address: address,
         name: name,
         ownerId: ownerId,
         latitude: lat,
         longitude: lng,
         lineLength: 0,
-      }).then(function(data) {
+      };
+
+      Bathroom.create(newBathroom).then(function(data) {
         res.send(data);
+
+        const createdBathroom = data.dataValues;
+
+        User.findAll({
+          where: queryHelpers.getNeabyUsersWhereClause(lat, lng)
+        }).then(function(nearby) {
+          nearby.forEach(function(user) {
+            const userData = user.dataValues;
+
+            emitter.emit(userData.id, actions.messageBathroomCreated(createdBathroom));
+          });
+        });
       });
     } else {
       res.send(foundBathroom);
