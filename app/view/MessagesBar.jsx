@@ -46,25 +46,19 @@ export default class MessagesBar extends MUIBaseTheme {
           bottom: "0px",
         }}
         zDepth={1}>
-        <a id="logout-link" href="/logout">logout</a>
-        <BottomNavigation selectedIndex={1}>
-          <div className="timers toolbar-box">
-            { this.renderTimers(timeInBathroom) }
+        <div>
+          <div className="message-icon-container">
+            <div className="message-icon"/>
+            <div>Messages</div>
           </div>
-          <BottomNavigationItem
-            label="Messages"
-            icon={ <div className="message-icon"/> }
-            onTouchTap={() => this.select(0)}
-            style={{
-              height: 100,
-              position: "absolute",
-              top: 10,
-            }}
-          />
           <div className="messages toolbar-box">
             { messages.map(m => <Message map={ map } key={ m.createdAt }  message={ m }/>) }
           </div>
-        </BottomNavigation>
+          <div className="timers toolbar-box">
+            { this.renderTimers(timeInBathroom) }
+          </div>
+        </div>
+        <a id="logout-link" href="/logout">logout</a>
       </Paper>
     );
 	}
