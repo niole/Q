@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from 'react';
 import $ from 'jquery';
 import { connect } from 'react-redux';
-import Popover from 'material-ui/Popover/Popover';
+import Dialog from 'material-ui/Dialog';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import MUIBaseTheme from './MUIBaseTheme.jsx';
@@ -18,8 +18,9 @@ import {
 
 const { bool, arrayOf, string, object, number, oneOfType } = PropTypes;
 const propTypes = {
+  address: string.isRequired,
+  name: string.isRequired,
   map: object.isRequired,
-  location: arrayOf(number.isRequired).isRequired,
   lineLength: number.isRequired,
   shouldOpen: bool.isRequired,
   userId: number.isRequired,
@@ -339,29 +340,29 @@ class ToolTip extends MUIBaseTheme {
     const {
       target,
       shouldOpen,
-      location,
       userRank,
+      name,
+      address,
     } = this.props;
 
     return (
-      <Popover
-        open={shouldOpen}
-        anchorEl={target}
-        anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+      <Dialog
+        title={ name }
+        actions={ this.getButtons() }
+        modal={false}
+        open={ true }
         onRequestClose={ this.handleRequestClose }
       >
         <Menu>
-          <MenuItem key="location">{ location }</MenuItem>
+          <MenuItem key="location">{ address }</MenuItem>
           <MenuItem key="line-vis">
             <div className="toilet-header">
               { this.getLineHeader() }
             </div>
             { this.getLineBody() }
           </MenuItem>
-          <MenuItem key="btns">{ this.getButtons() }</MenuItem>
         </Menu>
-      </Popover>
+      </Dialog>
     );
 	}
 }

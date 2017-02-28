@@ -221,6 +221,8 @@ class Map extends MUIBaseTheme {
         showTooltip: false,
         lineLength: b.lineLength,
         id: b.id,
+        name: b.name,
+        address: b.address,
       };
     });
   }
@@ -412,13 +414,14 @@ class Map extends MUIBaseTheme {
 
         return (
           <ToolTip
+            name={ b.name }
             map={ this.map }
             bathroomId={ b.id }
-            location={ [b.lat, b.lng] }
             target={ document.getElementById(`${b.id}-tooltip`) }
             shouldOpen={ true }
             userId={ userId }
             closeTooltip={ this.closeTooltip }
+            address={ b.address }
           />
         );
       }
