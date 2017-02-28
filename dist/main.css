@@ -130,12 +130,12 @@ a:active {
 }
 
 .gmaps-infowindow {
-  width: 313px;
+  width: 430px;
   height: 160px;
 }
 
 .gm-style-iw {
-  width: 313px;
+  width: 430px;
   height: 160px;
 }
 
@@ -182,13 +182,17 @@ a:active {
   display: inline-block;
 }
 
+.enter-leave-container {
+  display: inline-block;
+}
+
 .message-icon-container {
   text-align: center;
-  padding: 15px 10px;
+  padding: 25px 20px;
   border-radius: 3px;
   display: inline-block;
   border: 1px solid;
-  margin: 20px;
+  margin: 10px;
   color: deepskyblue;
 }
 

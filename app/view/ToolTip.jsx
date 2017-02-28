@@ -204,13 +204,8 @@ class ToolTip extends MUIBaseTheme {
       timer,
     } = this.props;
 
-    let handler = this.leaveLine;
-    let label = "Click to Leave Line";
-
-    if (userRank <= 0) {
-      label = "Click to Enter Line";
-      handler = this.enterLine;
-    }
+    let label = "Click to Enter Line";
+    let handler = this.enterLine;
 
     if (userRank === 0) {
       if (!inBathroom) {
@@ -243,10 +238,22 @@ class ToolTip extends MUIBaseTheme {
     }
 
     const labelStyle = { textTransform: "none" };
-    const style = label !== "Enter Line" ? { marginRight: 20 } : {};
 
     return (
-      <FlatButton labelStyle={ labelStyle } style={ style } key={ `${label}-btn` } onClick={ handler } label={ label }/>
+      <div className="enter-leave-container">
+        <FlatButton
+          disabled={ userRank < 0 }
+          labelStyle={ labelStyle }
+          key="leave-btn"
+          onClick={ this.leaveLine }
+          label="Click to Leave Line"/>
+        <FlatButton
+          disabled={ userRank > 0 }
+          labelStyle={ labelStyle }
+          key={ `${label}-btn` }
+          onClick={ handler }
+          label={ label }/>
+      </div>
     );
   }
 
@@ -342,7 +349,7 @@ class ToolTip extends MUIBaseTheme {
         anchorEl={target}
         anchorOrigin={{horizontal: 'left', vertical: 'top'}}
         targetOrigin={{horizontal: 'left', vertical: 'top'}}
-        onRequestClose={this.handleRequestClose}
+        onRequestClose={ this.handleRequestClose }
       >
         <Menu>
           <MenuItem key="location">{ location }</MenuItem>
