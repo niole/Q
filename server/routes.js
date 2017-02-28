@@ -94,9 +94,10 @@ router.get('/linemember/:userid', function(req, res) {
 });
 
 //enter line at bathroom
-router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
+router.post('/linemember/:userid/:bathroomid/new', function(req, res) {
   const bathroomId = req.params.bathroomid;
   const userId = req.params.userid;
+  const mapBounds = req.body.mapBounds;
 
   Bathroom.findAll({
     where: {
@@ -122,7 +123,7 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
             userId: userId
           }).then(function() {
               User.findAll({
-                where: dataHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, userId)
+                where: dataHelpers.getNeabyUsersWhereClause(mapBounds, userId)
               }).then(function(nearby) {
                 emitter = req.app.get('socketio');
 
@@ -146,25 +147,81 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
 });
 
 //enter bathroom
-router.get('/linemember/:linememberid/enter', function(req, res) {
-  const linememberid = req.params.linememberid;
+router.post('/bathrooms/:bathroomId/:userId/enter', function(req, res) {
+  //update line rank and delete all other linemembers of this user
+  //update nearby users
+  const bathroomId = req.params.bathroomId;
+  const userId = req.params.userId;
+  const mapBounds = req.body.mapBounds;
 
-  LineMember.update({
-    rank: 0,
-  }, {
+  LineMember.findAll({
     where: {
-      id: linememberid
+      bathroomId: {
+        $ne: bathroomId,
+      },
+      userId: userId,
     }
-  }).then(function(lineMembers) {
-    res.send(lineMembers);
+  }).then(function(oldLineMembers) {
+      oldLineMembers.forEach(function(lm) {
+        const goneLineMember = lm.dataValues;
+
+        Bathroom.update({
+          lineLength: sequelize.literal('line_length - 1')
+        }, {
+          where: {
+            id: goneLineMember.bathroomId,
+          }
+        }).then(function() {
+
+          LineMember.update({
+            rank: sequelize.literal('rank - 1')
+          }, {
+            where: {
+              bathroomId: goneLineMember.bathroomId,
+              rank: {
+                $gt: goneLineMember.rank
+              }
+            }
+          });
+        });
+      });
+
+    LineMember.destroy({
+      where: {
+        bathroomId: {
+          $ne: bathroomId,
+        },
+        userId: userId,
+      }
+    }).then(function() {
+
+      User.findAll({
+        where: dataHelpers.getNeabyUsersWhereClause(mapBounds, userId)
+      }).then(function(nearby) {
+        emitter = req.app.get('socketio');
+
+        nearby.forEach(function(user) {
+          const userData = user.dataValues;
+
+          emitter.emit(userData.id, actions.messageReceivedRankUpdated(bathroomId)); //tells affected userss to go get their new ranks
+        });
+
+        res.send({
+          bathroomId: bathroomId,
+        });
+      });
+    });
+
   });
+
 
 });
 
 //leave bathroom/line
-router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
+router.post('/linemember/:userId/:bathroomId/leave', function(req, res) {
   const userId = req.params.userId;
   const bathroomId = req.params.bathroomId;
+  const mapBounds = req.body.mapBounds;
 
   LineMember.find({
     where: {
@@ -207,7 +264,7 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
               const bathroomData = bathroom.dataValues;
 
               User.findAll({
-                where: dataHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude, userId)
+                where: dataHelpers.getNeabyUsersWhereClause(mapBounds, userId)
               }).then(function(nearby) {
                 emitter = req.app.get('socketio');
 
@@ -270,7 +327,8 @@ router.post('/linemember/:bathroomId/:userId/cut', function(req, res) {
 
 //accept a message
 router.post('/messages/accept', function(req, res) {
-  const message = req.body;
+  const message = req.body.message;
+  const mapBounds = req.body.mapBounds;
 
   Message.destroy({
     where: {
@@ -341,7 +399,7 @@ router.post('/messages/accept', function(req, res) {
                   const bathroom = bathroomData.dataValues;
 
                   User.findAll({
-                    where: dataHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, message.toId)
+                    where: dataHelpers.getNeabyUsersWhereClause(mapBounds, message.toId)
                   }).then(function(nearby) {
                     //nearby includes whoever sent the now deleted message
                     emitter = req.app.get('socketio');
@@ -410,6 +468,8 @@ router.post('/bathrooms/add', function(req, res) {
   const ownerId = parseInt(req.body.ownerId);
   const lat = parseFloat(req.body.lat);
   const lng = parseFloat(req.body.lng);
+  const mapBounds = req.body.mapBounds;
+  console.log('mapBounds', mapBounds);
 
   Bathroom.find({
     where: {
@@ -437,7 +497,7 @@ router.post('/bathrooms/add', function(req, res) {
         const createdBathroom = data.dataValues;
 
         User.findAll({
-          where: dataHelpers.getNeabyUsersWhereClause(lat, lng)
+          where: dataHelpers.getNeabyUsersWhereClause(mapBounds)
         }).then(function(nearby) {
           nearby.forEach(function(user) {
             const userData = user.dataValues;

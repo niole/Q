@@ -1,4 +1,8 @@
+import Timer from './Timer.js';
+
 import {
+  REMOVE_TIMER,
+  ADD_TIMER,
   UPDATE_LINE_RANK,
   REMOVE_FROM_LINE,
   ADD_TO_LINE,
@@ -35,17 +39,34 @@ const initialState = {
   lines: {},
   messages: [],
   nearbyBathrooms: [],
-  occupyingBathroom: false,
+  occupiedBathroom: "",
   timers: {},
+  timeInBathroom: {},
   addingBathroom: false,
   inProgressBathroomAddress: null,
 };
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
+    case REMOVE_TIMER:
+      const updatedTs = Object.assign({}, state.timers);
+      delete updatedTs[action.data];
+
+      return Object.assign({}, state, {
+        timers: updatedTs,
+      });
+
+    case ADD_TIMER:
+      return Object.assign({}, state, {
+        timers: Object.assign({}, state.timers, action.data),
+      });
+
     case MSG_BATHROOM_CREATED:
       return Object.assign({}, state, {
         nearbyBathrooms: state.nearbyBathrooms.concat(action.data),
+        timers: !state.timers[action.data[0].id] ?
+          Object.assign({}, state.timers, { [action.data[0].id]: new Timer() }) :
+          state.timers,
       });
 
     case TOGGLE_BATHROOM_MAKER:
@@ -57,17 +78,25 @@ export default function appReducer(state = initialState, action) {
 
     case UPDATE_TIME_IN_BATHROOM:
       return Object.assign({}, state, {
-        timers: Object.assign(state.timers, {
-          [action.data.bathroomId]: (state.timers[action.data.bathroomId] || 0) + action.data.time,
+        timeInBathroom: Object.assign(state.timeInBathroom, {
+          [action.data.bathroomId]: (state.timeInBathroom[action.data.bathroomId] || 0) + action.data.time,
         }),
+
       });
 
     case ENTER_BATHROOM:
+      let newTimers = Object.assign({}, state.timers);
+      const bathId = action.data.bathroomId.toString();
+      for (let timerKey in newTimers) {
+        if (timerKey !== bathId) {
+          newTimers[timerKey].stopTimer();
+        }
+      }
       return Object.assign({}, state, {
-        occupyingBathroom: action.data.bathroomId,
-        timers: Object.assign(state.timers, {
-          [action.data.bathroomId]: action.data.time,
-        }),
+        occupiedBathroom: action.data.bathroomId,
+        timeInBathroom: { [action.data.bathroomId]: action.data.time },
+        lines: { [action.data.bathroomId]: 0 },
+        timers: newTimers,
       });
 
     case MSG_RANK_UPDATED:
@@ -98,7 +127,7 @@ export default function appReducer(state = initialState, action) {
           }
           return b;
         }),
-        timers: Object.assign(state.timers, {
+        timeInBathroom: Object.assign(state.timeInBathroom, {
           [action.data.bathroomId]: action.data.newRank === 0 ? 20 : 0,
         }),
       });
@@ -207,7 +236,11 @@ export default function appReducer(state = initialState, action) {
             acc[lm.bathroomId] = lm.rank;
             return acc;
           }, Object.assign({}, state.lines)) :
-          state.lines
+          state.lines,
+        timers: action.data.newNearByBathrooms.reduce((ts, bRoom) => {
+          ts[bRoom.id] = new Timer();
+          return ts;
+        }, Object.assign({}, state.timers)),
       });
 
     case REMOVE_BATHROOMS:
@@ -235,8 +268,8 @@ export default function appReducer(state = initialState, action) {
           }
           return b;
         }),
-        occupyingBathroom: false,
-        timers: Object.assign(state.timers, {
+        occupiedBathroom: "",
+        timeInBathroom: Object.assign(state.timeInBathroom, {
           [action.data.bathroomId]: 0,
         }),
       });
@@ -250,7 +283,7 @@ export default function appReducer(state = initialState, action) {
           }
           return b;
         }),
-        timers: Object.assign(state.timers, {
+        timeInBathroom: Object.assign(state.timeInBathroom, {
           [action.data.bathroomId]: action.data.time,
         }),
       });

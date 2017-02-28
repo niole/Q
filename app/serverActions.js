@@ -12,12 +12,12 @@ function messageBathroomCreated(bathroom) {
   };
 }
 
-function messageReceivedRankUpdated(bathroomId) {
+function messageReceivedRankUpdated(bathroomId, newRank) {
   return {
     type: MSG_RANK_UPDATED,
     data: {
       bathroomId: bathroomId,
-      newRank: null
+      newRank: newRank || null,
     }
   };
 }

@@ -7,9 +7,10 @@ import {
 } from '../actions.js';
 
 
-const { object, arrayOf } = PropTypes;
+const { object } = PropTypes;
 const propTypes = {
   message: object.isRequired,
+  map: object.isRequired,
 };
 
 class Message extends Component {
@@ -38,14 +39,23 @@ class Message extends Component {
     const {
       message,
       acceptCut,
+      map,
     } = this.props;
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
 
     const url = 'routes/messages/accept';
     $.ajax({
       url,
       type: "POST",
       dataType: "json",
-      data: message,
+      data: {
+        message,
+        mapBounds: {
+          lats: [ne.lat(), sw.lat()],
+          lngs: [ne.lng(), sw.lng()],
+        }
+      },
       success: data => {
         acceptCut(...data);
       },

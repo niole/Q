@@ -21,6 +21,25 @@ export const UPDATE_USER_ID = "updateUserId";
 
 export const BULK_UPDATE_PRIMITIVES = "bulkUpdatePrimitivesOnly";
 
+export const ADD_TIMER = "addTimer";
+export const REMOVE_TIMER = "removeTimer";
+
+export function removeTimer(bathroomId) {
+  return {
+    type: REMOVE_TIMER,
+    data: bathroomId,
+  };
+}
+
+export function addTimer(bathroomId, timer) {
+  return {
+    type: ADD_TIMER,
+    data: {
+      [bathroomId]: timer,
+    }
+  };
+}
+
 export function toggleBathroomMaker(makeBathroom = false, address = null, latLng = null) {
   return {
     type: TOGGLE_BATHROOM_MAKER,

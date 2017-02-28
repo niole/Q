@@ -7,7 +7,6 @@ import MenuItem from 'material-ui/MenuItem';
 import MUIBaseTheme from './MUIBaseTheme.jsx';
 import FlatButton from 'material-ui/FlatButton';
 import Line from './Line.jsx';
-import timer from '../globalTimer.js';
 import {
   enterLine,
   leaveLine,
@@ -19,6 +18,7 @@ import {
 
 const { bool, arrayOf, string, object, number, oneOfType } = PropTypes;
 const propTypes = {
+  map: object.isRequired,
   location: arrayOf(number.isRequired).isRequired,
   lineLength: number.isRequired,
   shouldOpen: bool.isRequired,
@@ -83,11 +83,23 @@ class ToolTip extends MUIBaseTheme {
       userId,
       bathroomId,
       enterLine,
+      map,
     } = this.props;
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
+
     const url = `routes/linemember/${userId}/${bathroomId}/new`;
 
     $.ajax({
+      type: "POST",
       url,
+      data: {
+        mapBounds: {
+          lats: [ne.lat(), sw.lat()],
+          lngs: [ne.lng(), sw.lng()],
+        }
+      },
+      dataType: "json",
       success: lineDetails => {
         const {
           bathroomId,
@@ -116,12 +128,24 @@ class ToolTip extends MUIBaseTheme {
       userId,
       bathroomId,
       leaveLine,
+      timer,
+      map,
     } = this.props;
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
 
     const url = `routes/linemember/${userId}/${bathroomId}/leave`;
 
     $.ajax({
+      type: "POST",
       url,
+      data: {
+        mapBounds: {
+          lats: [ne.lat(), sw.lat()],
+          lngs: [ne.lng(), sw.lng()],
+        }
+      },
+      dataType: "json",
       success: data => {
         console.log('success');
         leaveLine(data.bathroomId, data.lineLength);
@@ -140,11 +164,35 @@ class ToolTip extends MUIBaseTheme {
     const {
       enterBathroom,
       bathroomId,
+      timer,
+      map,
+      userId,
     } = this.props;
 
     timer.stopTimer();
 
-    enterBathroom(bathroomId, 180);
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
+
+    const url = `routes/bathrooms/${bathroomId}/${userId}/enter`;
+
+    $.ajax({
+      type: "POST",
+      url,
+      data: {
+        mapBounds: {
+          lats: [ne.lat(), sw.lat()],
+          lngs: [ne.lng(), sw.lng()],
+        }
+      },
+      dataType: "json",
+      success: data => {
+        enterBathroom(bathroomId, 180);
+      },
+      error: e => {
+        console.log('error', e);
+      }
+    });
   }
 
   /**
@@ -152,6 +200,10 @@ class ToolTip extends MUIBaseTheme {
    */
   getEnterLeaveButton(userRank, inBathroom, timeInBathroom) {
     //enter bathroom is handled somewhere else
+    const {
+      timer,
+    } = this.props;
+
     let handler = this.leaveLine;
     let label = "Click to Leave Line";
 
@@ -212,6 +264,10 @@ class ToolTip extends MUIBaseTheme {
      always adds 1 min
    */
   addTime() {
+    const {
+      timer,
+    } = this.props;
+
     const ms = 60000;
     const s = 60;
     timer.addAdditionalTime(ms);
@@ -309,10 +365,12 @@ ToolTip.defaultProps = defaultProps;
 const mapStateToProps = (state, ownProps) => {
   const bathroom = state.nearbyBathrooms.find(b => b.id === ownProps.bathroomId);
   return {
-    occupyingBathroom: state.occupyingBathroom,
+    occupyingBathroom: state.occupiedBathroom === ownProps.bathroomId,
+    occupiedBathroom: state.occupiedBathroom,
     userRank: state.lines[ownProps.bathroomId],
     lineLength: bathroom ? bathroom.lineLength : 0,
-    timeInBathroom: state.timers[ownProps.bathroomId] || 0,
+    timeInBathroom: state.timeInBathroom[ownProps.bathroomId] || 0,
+    timer: state.timers[ownProps.bathroomId],
   };
 }
 

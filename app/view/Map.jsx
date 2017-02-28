@@ -8,7 +8,6 @@ import ToolTip from './ToolTip.jsx';
 import MessagesBar from './MessagesBar.jsx';
 import CreateBathroomDialog from './CreateBathroomDialog.jsx';
 import { getLatLngRange } from '../dataHelpers.js';
-
 import {
   updateUserLocation,
   addBathrooms,
@@ -21,7 +20,6 @@ import {
   bulkUpdatePrimitives,
   toggleBathroomMaker,
 } from '../actions.js';
-
 import {
   messageReceivedUpdateLineLineMember,
   MSG_LEFT_LINE,
@@ -63,7 +61,7 @@ class Map extends MUIBaseTheme {
 
 
     if (oldLocation[0] !== newLocation[0] || oldLocation[1] !== newLocation[1]) {
-      this.updateUserLocation(newLocation, this.props.userId, updatedLocation => {
+      this.updateUserLocation(newLocation, newProps.userId, updatedLocation => {
         this.map.panTo(new google.maps.LatLng(...newLocation));
       });
     }
@@ -411,16 +409,18 @@ class Map extends MUIBaseTheme {
     for (; i < bathrooms.length; i++) {
       b = bathrooms[i];
       if (b.showTooltip) {
-          return (
-            <ToolTip
-              bathroomId={ b.id }
-              location={ [b.lat, b.lng] }
-              target={ document.getElementById(`${b.id}-tooltip`) }
-              shouldOpen={ true }
-              userId={ userId }
-              closeTooltip={ this.closeTooltip }
-            />
-          );
+
+        return (
+          <ToolTip
+            map={ this.map }
+            bathroomId={ b.id }
+            location={ [b.lat, b.lng] }
+            target={ document.getElementById(`${b.id}-tooltip`) }
+            shouldOpen={ true }
+            userId={ userId }
+            closeTooltip={ this.closeTooltip }
+          />
+        );
       }
     }
   }
@@ -434,7 +434,7 @@ class Map extends MUIBaseTheme {
 
   showAddBathroomDialog() {
     return (
-      <CreateBathroomDialog/>
+      <CreateBathroomDialog map={ this.map }/>
     );
   }
 
@@ -462,7 +462,7 @@ class Map extends MUIBaseTheme {
     const {
       nearbyBathrooms,
       messages,
-      timers,
+      timeInBathroom,
       addingBathroom,
       userId,
       updateUserLocation,
@@ -480,7 +480,7 @@ class Map extends MUIBaseTheme {
         </div>
         { addingBathroom && this.showAddBathroomDialog() }
         { this.showOpenToolTips(nearbyBathrooms) }
-        <MessagesBar timers={ timers } messages={ messages }/>
+        <MessagesBar map={ this.map } timeInBathroom={ timeInBathroom } messages={ messages }/>
       </div>
 		);
 	}
@@ -495,19 +495,19 @@ const mapStateToProps = (state) => {
     nearbyBathrooms,
     lines,
     messages,
-    timers,
     inProgressBathroomAddress,
     inProgressBathroomLatLng,
     addingBathroom,
+    timeInBathroom,
   } = state;
 
   return {
+    timeInBathroom,
     lines,
     userId,
     userLocation,
     nearbyBathrooms,
     messages,
-    timers,
     inProgressBathroomAddress,
     inProgressBathroomLatLng,
     addingBathroom,

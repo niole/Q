@@ -11,6 +11,12 @@ import {
 } from '../actions.js';
 
 
+const { object } = PropTypes;
+const propTypes = {
+  map: object.isRequired,
+};
+
+
 class CreateBathroomDialog extends MUIBaseTheme {
   constructor() {
     super();
@@ -23,8 +29,10 @@ class CreateBathroomDialog extends MUIBaseTheme {
       inProgressBathroomLatLng,
       inProgressBathroomAddress,
       userId,
+      map,
     } = this.props;
-
+    const ne = map.getBounds().getNorthEast();
+    const sw = map.getBounds().getSouthWest();
     //get data
     const name = document.getElementById("new-bathroom-name").value;
 
@@ -36,6 +44,10 @@ class CreateBathroomDialog extends MUIBaseTheme {
         type: "POST",
         dataType: "json",
         data: {
+          mapBounds: {
+            lats: [ne.lat(), sw.lat()],
+            lngs: [ne.lng(), sw.lng()],
+          },
           address: inProgressBathroomAddress,
           name: name,
           ownerId: userId,
@@ -110,6 +122,8 @@ const mapStateToProps = (state) => {
     userId,
   };
 }
+
+CreateBathroomDialog.propTypes = propTypes;
 
 const mapDispatchToProps = dispatch => {
   //initiated by actions

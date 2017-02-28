@@ -9,12 +9,12 @@ import Timeout from './Timeout.jsx';
 const { object, arrayOf } = PropTypes;
 const propTypes = {
   messages: arrayOf(object),
-  timers: object,
+  map: object.isRequired,
+  timeInBathroom: object.isRequired,
 };
 
 const defaultProps = {
   messages: [],
-  timers: {},
 };
 
 export default class MessagesBar extends MUIBaseTheme {
@@ -32,8 +32,9 @@ export default class MessagesBar extends MUIBaseTheme {
 
 	render() {
    const {
-     timers,
+     timeInBathroom,
      messages,
+     map,
    } = this.props;
 
    return (
@@ -48,7 +49,7 @@ export default class MessagesBar extends MUIBaseTheme {
         <a id="logout-link" href="/logout">logout</a>
         <BottomNavigation selectedIndex={1}>
           <div className="timers toolbar-box">
-            { this.renderTimers(timers) }
+            { this.renderTimers(timeInBathroom) }
           </div>
           <BottomNavigationItem
             label="Messages"
@@ -61,7 +62,7 @@ export default class MessagesBar extends MUIBaseTheme {
             }}
           />
           <div className="messages toolbar-box">
-            { messages.map(m => <Message key={ m.createdAt }  message={ m }/>) }
+            { messages.map(m => <Message map={ map } key={ m.createdAt }  message={ m }/>) }
           </div>
         </BottomNavigation>
       </Paper>
