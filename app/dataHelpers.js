@@ -1,8 +1,4 @@
-const geolib = require('geolib');
-
 function getLatLngRange(mapBounds) {
-  console.log('mapBounds', mapBounds);
-
   const lngs = mapBounds.lngs.sort(function(a, b) { return a-b; });
   const lats = mapBounds.lats.sort(function(a, b) { return a-b; });
 
