@@ -75,10 +75,13 @@ export function updateUserId(userId) {
   };
 }
 
-export function updateUserLocation(newLocation) {
+export function updateUserLocation(newLocation, ranges) {
   return {
     type: UPDATE_USER_LOCATION,
-    data: newLocation,
+    data: {
+      newLocation,
+      ranges,
+    }
   };
 }
 

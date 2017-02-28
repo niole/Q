@@ -1,7 +1,6 @@
 const geolib = require('geolib');
 
-
-function getNeabyUsersWhereClause(centralLat, centralLng, userToExclude) {
+function getLatLngRange(centralLat, centralLng) {
   const bLocation = {
     lat: centralLat,
     lon: centralLng,
@@ -15,13 +14,24 @@ function getNeabyUsersWhereClause(centralLat, centralLng, userToExclude) {
   const lngs = [west.longitude, east.longitude].sort(function(a, b) { return a-b; });
   const lats = [south.latitude, north.latitude].sort(function(a, b) { return a-b; });
 
+  return {
+    lngs: lngs,
+    lats: lats,
+  };
+
+}
+
+
+function getNeabyUsersWhereClause(centralLat, centralLng, userToExclude) {
+  const ranges = getLatLngRange(centralLat, centralLng);
+
   if (userToExclude) {
     return {
       longitude: {
-        $between: lngs,
+        $between: ranges.lngs,
       },
       latitude: {
-        $between: lats,
+        $between: ranges.lats,
       },
       id: {
         $ne: userToExclude
@@ -31,14 +41,15 @@ function getNeabyUsersWhereClause(centralLat, centralLng, userToExclude) {
 
   return {
    longitude: {
-     $between: lngs,
+     $between: ranges.lngs,
    },
    latitude: {
-     $between: lats,
+     $between: ranges.lats,
    }
   };
 }
 
 module.exports = {
   getNeabyUsersWhereClause: getNeabyUsersWhereClause,
+  getLatLngRange: getLatLngRange,
 };

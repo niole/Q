@@ -173,8 +173,25 @@ export default function appReducer(state = initialState, action) {
       });
 
     case UPDATE_USER_LOCATION:
+      //only keep lines and nearbyBathrooms that are within action.data.ranges
+      const {
+        lats,
+        lngs,
+      } = action.data.ranges;
+      const nearbyLines = Object.assign({}, state.lines);
+
+      const updatedBathrooms = state.nearbyBathrooms.filter(b => {
+        if (b.lat > lats[1] || b.lat < lats[0] && b.lng > lngs[1] || b.lng < lngs[0]) {
+          delete nearbyLines[b.id];
+          return false;
+        }
+        return true;
+      });
+
       return Object.assign({}, state, {
-        userLocation: action.data,
+        userLocation: action.data.newLocation,
+        nearbyBathrooms: updatedBathrooms,
+        lines: nearbyLines,
       });
 
     case UPDATE_USER_ID:

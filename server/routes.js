@@ -1,7 +1,7 @@
 "use strict";
 const express = require('express');
 const router = express.Router();
-const queryHelpers = require('../app/queryHelpers.js');
+const dataHelpers = require('../app/dataHelpers.js');
 const s = require('../expressAppInstance.js');
 const io = require('socket.io')(s.server);
 const models = require('./Models.js');
@@ -122,7 +122,7 @@ router.get('/linemember/:userid/:bathroomid/new', function(req, res) {
             userId: userId
           }).then(function() {
               User.findAll({
-                where: queryHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, userId)
+                where: dataHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, userId)
               }).then(function(nearby) {
                 emitter = req.app.get('socketio');
 
@@ -207,7 +207,7 @@ router.get('/linemember/:userId/:bathroomId/leave', function(req, res) {
               const bathroomData = bathroom.dataValues;
 
               User.findAll({
-                where: queryHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude, userId)
+                where: dataHelpers.getNeabyUsersWhereClause(bathroomData.latitude, bathroomData.longitude, userId)
               }).then(function(nearby) {
                 emitter = req.app.get('socketio');
 
@@ -341,7 +341,7 @@ router.post('/messages/accept', function(req, res) {
                   const bathroom = bathroomData.dataValues;
 
                   User.findAll({
-                    where: queryHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, message.toId)
+                    where: dataHelpers.getNeabyUsersWhereClause(bathroom.latitude, bathroom.longitude, message.toId)
                   }).then(function(nearby) {
                     //nearby includes whoever sent the now deleted message
                     emitter = req.app.get('socketio');
@@ -437,7 +437,7 @@ router.post('/bathrooms/add', function(req, res) {
         const createdBathroom = data.dataValues;
 
         User.findAll({
-          where: queryHelpers.getNeabyUsersWhereClause(lat, lng)
+          where: dataHelpers.getNeabyUsersWhereClause(lat, lng)
         }).then(function(nearby) {
           nearby.forEach(function(user) {
             const userData = user.dataValues;

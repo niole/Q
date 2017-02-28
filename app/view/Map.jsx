@@ -5,6 +5,8 @@ import $ from 'jquery';
 import ToolTip from './ToolTip.jsx';
 import MessagesBar from './MessagesBar.jsx';
 import CreateBathroomDialog from './CreateBathroomDialog.jsx';
+import { getLatLngRange } from '../dataHelpers.js';
+
 import {
   updateUserLocation,
   addBathrooms,
@@ -40,6 +42,7 @@ const propTypes = {
 class Map extends Component {
   constructor() {
     super();
+    this.userMarker = null;
     this.map = null;
     this.messageHandler = null;
 
@@ -57,8 +60,11 @@ class Map extends Component {
 
 
     if (oldLocation[0] !== newLocation[0] || oldLocation[1] !== newLocation[1]) {
-      this.map.panTo(new google.maps.LatLng(...newLocation));
+      this.updateUserLocation(newLocation, this.props.userId, updatedLocation => {
+        this.map.panTo(new google.maps.LatLng(...newLocation));
+      });
     }
+
   }
 
   initGeoCoder() {
@@ -97,7 +103,7 @@ class Map extends Component {
           geocoder.geocode({ 'latLng': event.latLng }, (results, status) => {
             if (status == google.maps.GeocoderStatus.OK) {
               const latLng = [event.latLng.lat(), event.latLng.lng()];
-              const address =results[1].formatted_address ? results[1].formatted_address : latLng;
+              const address =results[0].formatted_address ? results[0].formatted_address : latLng;
               getAddress(address, latLng);
             }
           });
@@ -110,8 +116,6 @@ class Map extends Component {
     });
 
     const userId = this.getUserIdFromURL(); //TODO this is a hack and must change
-
-    this.updateUserLocation(null, userLocation, userId);
 
     this.setInitialState(
       userId,
@@ -259,16 +263,24 @@ class Map extends Component {
         navigator.geolocation.getCurrentPosition(locationData => {
           let userLocation = this.props.userLocation;
 
-          if (false) { //locationData && locationData.coords) {//TODO this is a hack and must change
+          if (locationData && locationData.coords) {
             const {
               longitude,
               latitude,
             } = locationData.coords;
 
-            userLocation = [longitude, latitude];
+            userLocation = [latitude, longitude];
           }
 
-          bulkUpdatePrimitives({ userId, userLocation, messages });
+          if (userLocation[0] !== this.props.userLocation[0] &&
+            userLocation[1] !== this.props.userLocation[1]) {
+            this.updateUserLocation(userLocation, userId, newLocation => {
+              bulkUpdatePrimitives({ userId, newLocation, messages });
+            });
+           } else {
+              bulkUpdatePrimitives({ userId, userLocation, messages });
+           }
+
           callback();
         });
       },
@@ -291,15 +303,10 @@ class Map extends Component {
     return userId;
   }
 
-  updateUserLocation(oldLocation, newLocation, userId) {
+  updateUserLocation(newLocation, userId, callback) {
     const {
       updateUserLocation,
     } = this.props;
-
-    if (oldLocation) {
-     //TODO remove user from old location
-     //remove bathrooms that aren't nearby anymore
-    }
 
     const newPosition = {
       lat: newLocation[0],
@@ -318,15 +325,18 @@ class Map extends Component {
       },
       success: d => {
         console.log('success', d);
+
+        this.userMarker = new google.maps.Marker({
+          position: newPosition,
+           map: this.map,
+           icon: '../user_loc_icon.png'
+         });
+
+        updateUserLocation(newLocation, getLatLngRange(newLocation[0], newLocation[1]));
+        callback(newLocation);
       }
     });
 
-
-    const marker = new google.maps.Marker({
-      position: newPosition,
-       map: this.map,
-       icon: '../user_loc_icon.png'
-     });
   }
 
   handleBathroomClick(b) {
@@ -352,38 +362,6 @@ class Map extends Component {
           lineMembers,
         } = bathroomData;
         const newNearByBathrooms = this.newNearbyBathroomsHandler(nearbyBathrooms);
-        //const newNearByBathrooms = nearbyBathrooms.map(b => {
-        //  const marker = new google.maps.Marker({
-        //    position: { lat: b.latitude, lng: b.longitude },
-        //    map: this.map
-        //  });
-
-        //  const infoWindow = new google.maps.InfoWindow({
-        //    content: ReactDOMServer.renderToString(<div id={ `${b.id}-tooltip` } className="gmaps-infowindow"/>),
-        //  });
-
-        //  const boundListener = this.handleBathroomClick.bind(this, b);
-
-        //  google.maps.event.addListener(marker, 'click', () => {
-        //    infoWindow.open(this.map, marker);
-        //    boundListener(b);
-        //  });
-
-        //  return {
-        //    marker,
-        //    infoWindow,
-        //    unmountHandler: () => {
-        //      //TODO this won't work
-        //      google.maps.event.removeEventListener(marker, 'click', boundListener);
-        //    },
-        //    lat: b.latitude,
-        //    lng: b.longitude,
-        //    showTooltip: false,
-        //    lineLength: b.lineLength,
-        //    id: b.id,
-        //  };
-        //});
-
         addBathrooms({ newNearByBathrooms, lineMembers });
       },
       error: e => {
@@ -495,7 +473,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   //initiated by actions
   //put in a container component that
   return {
-    updateUserLocation: location => dispatch(updateUserLocation(location)),
+    updateUserLocation: (location, ranges) => dispatch(updateUserLocation(location, ranges)),
     addBathrooms: bs => dispatch(addBathrooms(bs)),
     removeBathrooms: bs => dispatch(removeBathrooms(bs)),
     updateUserId: id => dispatch(updateUserId(id)),
