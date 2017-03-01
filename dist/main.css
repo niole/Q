@@ -150,8 +150,8 @@ a:active {
 }
 
 .hourglass {
-  width: 25px;
-  height: 25px;
+  width: 50px;
+  height: 50px;
   display: inline-block;
   background-repeat: no-repeat;
   background-position: center;
@@ -177,9 +177,11 @@ a:active {
 }
 
 .line {
-  width: 275px;
-  height: 25px;
+  width: 90%;
+  height: 35px;
+  top: -9px;
   display: inline-block;
+  position: relative;
 }
 
 .line-member {
