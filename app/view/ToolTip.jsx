@@ -347,14 +347,31 @@ class ToolTip extends MUIBaseTheme {
 
     return (
       <Dialog
+        titleStyle={{
+          left: 25,
+          position: "relative",
+          fontWeight: "bold",
+          fontSize: 28,
+          paddingBottom: 0,
+        }}
         title={ name }
         actions={ this.getButtons() }
         modal={false}
         open={ true }
         onRequestClose={ this.handleRequestClose }
       >
-        <Menu>
-          <MenuItem key="location">{ address }</MenuItem>
+        <Menu
+          disableAutoFocus={ true }
+          style={{ paddingBottom: "0px" }}>
+          <MenuItem
+            style={{
+              marginLeft: 10,
+              cursor: "grab",
+            }}
+            key="location"
+          >
+            { address }
+          </MenuItem>
           <MenuItem key="line-vis">
             <div className="toilet-header">
               { this.getLineHeader() }
